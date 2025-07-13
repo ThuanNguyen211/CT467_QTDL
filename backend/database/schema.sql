@@ -7,9 +7,7 @@ USE phong_kham;
 CREATE TABLE chuyen_khoa (
     ma_chuyen_khoa VARCHAR(10) PRIMARY KEY,
     ten_chuyen_khoa VARCHAR(100) NOT NULL,
-    mo_ta TEXT,
-    so_dien_thoai VARCHAR(20),
-    kinh_nghiem INT
+    mo_ta TEXT
 );
 
 CREATE TABLE bac_si (

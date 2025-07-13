@@ -1,9 +1,9 @@
 USE phong_kham;
 
-INSERT INTO chuyen_khoa (ma_chuyen_khoa, ten_chuyen_khoa, mo_ta, so_dien_thoai, kinh_nghiem) VALUES
-('CK01', 'Nội khoa', 'Chuyên khoa nội', '0987654321', 15),
-('CK02', 'Ngoại khoa', 'Chuyên khoa ngoại', '0987654322', 10),
-('CK03', 'Nhi khoa', 'Chuyên khoa nhi', '0987654323', 8);
+INSERT INTO chuyen_khoa (ma_chuyen_khoa, ten_chuyen_khoa, mo_ta) VALUES
+('CK01', 'Nội khoa', 'Chuyên khoa nội'),
+('CK02', 'Ngoại khoa', 'Chuyên khoa ngoại'),
+('CK03', 'Nhi khoa', 'Chuyên khoa nhi');
 
 INSERT INTO bac_si (ma_bac_si, ten_bac_si, ma_chuyen_khoa, so_dien_thoai, kinh_nghiem) VALUES
 ('BS01', 'Nguyen Van A', 'CK01', '0912345678', 10),
