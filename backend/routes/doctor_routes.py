@@ -16,6 +16,20 @@ def get_doctors():
         print("Lỗi lấy thông tin bác sĩ:", e)
         return jsonify({'error': str(e)}), 500
 
+@doctor_bp.route('/doctors/<string:ma_bac_si>', methods=['GET'])
+def get_doctors_id(ma_bac_si):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT * FROM bac_si  WHERE ma_bac_si = %s"
+        cursor.execute(sql, (ma_bac_si,))
+        data = cursor.fetchone()
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi lấy thông tin bác sĩ:", e)
+        return jsonify({'error': str(e)}), 500
+
 @doctor_bp.route('/doctors', methods=['POST'])
 def add_doctor():
     try:
