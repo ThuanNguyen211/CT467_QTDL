@@ -31,30 +31,3 @@ def add_doctor():
     conn.commit()
     conn.close()
     return jsonify({'message': 'Thêm bác sĩ thành công'}), 201
-
-# @doctor_bp.route('/doctors', methods=['POST'])
-# def add_doctor():
-#     try:
-#         data = request.json
-#         conn = get_connection()
-#         cursor = conn.cursor()
-
-#         sql = """
-#         INSERT INTO bac_si (ma_bac_si, ten_bac_si, ma_chuyen_khoa, so_dien_thoai, kinh_nghiem)
-#         VALUES (%s, %s, %s, %s, %s)
-#         """
-#         cursor.execute(sql, (
-#             data['ma_bac_si'],
-#             data['ten_bac_si'],
-#             data['ma_chuyen_khoa'],
-#             data['so_dien_thoai'],
-#             data['kinh_nghiem']
-#         ))
-
-#         conn.commit()
-#         conn.close()
-#         return jsonify({'message': 'Thêm bác sĩ thành công'}), 201
-
-#     except Exception as e:
-#         print("Lỗi:", e)
-#         return jsonify({'error': str(e)}), 500
