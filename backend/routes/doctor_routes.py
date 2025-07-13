@@ -13,7 +13,7 @@ def get_doctors():
         conn.close()
         return jsonify(data)
     except Exception as e:
-        print("Lỗi lấy bác sĩ:", e)
+        print("Lỗi lấy thông tin bác sĩ:", e)
         return jsonify({'error': str(e)}), 500
 
 @doctor_bp.route('/doctors', methods=['POST'])
