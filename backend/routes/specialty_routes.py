@@ -27,7 +27,7 @@ def get_specialty_id(ma_chuyen_khoa):
         return jsonify(result), 200
     except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
 @specialty_bp.route('/specialty', methods=['POST'])
 def add_specialty():
     try:
