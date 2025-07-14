@@ -95,4 +95,4 @@ def delete_doctor(ma_bac_si):
         return jsonify({'message': 'Xóa bác sĩ thành công'}), 200
     except Exception as e:
         print("Lỗi xóa bác sĩ:", e)
-        return jsonify({'error': str(e)}), 50
+        return jsonify({'error': str(e)}), 500
