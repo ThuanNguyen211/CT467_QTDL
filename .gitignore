@@ -1,4 +1,5 @@
-# Bỏ qua thư mục
+app.py
+db.py
 .idea/
 venv/
 backend/__pycache__/
