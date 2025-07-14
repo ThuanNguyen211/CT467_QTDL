@@ -1,3 +1,5 @@
 app.py
 db.py
-.idea
+.idea/
+venv/
+backend/__pycache__/
