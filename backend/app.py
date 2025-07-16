@@ -8,8 +8,7 @@ from routes.prescription_routes import prescription_bp
 from routes.specialty_routes import specialty_bp
 from routes.medicine_routes import medicine_bp
 from routes.patient_routes import patient_bp
-from routes.features import appointment_bp
-
+from routes.web_routes import web_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -23,7 +22,7 @@ app.register_blueprint(prescription_bp)
 app.register_blueprint(specialty_bp)
 app.register_blueprint(medicine_bp)
 app.register_blueprint(patient_bp)
-app.register_blueprint(appointment_bp)
+app.register_blueprint(web_bp)
 
 if __name__ == '__main__':
     app.run(port=5000)
