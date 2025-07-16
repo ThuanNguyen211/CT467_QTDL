@@ -1,0 +1,43 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Lịch hẹn của tôi{% endblock %}
+{% block content %}
+<h2>Lịch hẹn của tôi</h2>
+<form class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input type="date" class="form-control" name="date" value="{{ date }}">
+  </div>
+  <div class="col-md-4">
+    <select class="form-select" name="status">
+      <option value="">Tất cả trạng thái</option>
+      <option value="Chờ khám">Chờ khám</option>
+      <option value="Đã khám">Đã khám</option>
+      <option value="Hủy">Hủy</option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-primary w-100" type="submit">Lọc</button>
+  </div>
+</form>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>BN</th><th>Ngày</th><th>Giờ</th><th>Trạng thái</th><th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.ten_benh_nhan }}</td>
+      <td>{{ appt.ngay_hen }}</td>
+      <td>{{ appt.gio_hen }}</td>
+      <td>{{ appt.trang_thai }}</td>
+      <td>
+        {% if appt.trang_thai == 'Chờ khám' %}
+        <a href="/doctor/examinations/new?appointment_id={{ appt.ma_lich_hen }}" class="btn btn-sm btn-success">Tạo phiếu khám</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 

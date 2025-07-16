@@ -1,0 +1,23 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Lịch sử Phiếu Khám{% endblock %}
+{% block content %}
+<h2>Lịch sử Phiếu Khám</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mã phiếu</th><th>Bệnh nhân</th><th>Ngày khám</th><th>Triệu chứng</th><th>Chẩn đoán</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for exam in examinations %}
+    <tr>
+      <td>{{ exam.ma_phieu_kham }}</td>
+      <td>{{ exam.ten_benh_nhan }}</td>
+      <td>{{ exam.ngay_kham }}</td>
+      <td>{{ exam.trieu_chung }}</td>
+      <td>{{ exam.chan_doan }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 

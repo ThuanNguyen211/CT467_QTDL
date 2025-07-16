@@ -1,0 +1,28 @@
+{% extends 'base_patient.html' %}
+{% block title %}Lịch hẹn của tôi{% endblock %}
+{% block content %}
+<h2>Lịch hẹn của tôi</h2>
+<a href="/patient/appointments/new" class="btn btn-success mb-3">Đặt lịch mới</a>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Bác sĩ</th><th>Ngày</th><th>Giờ</th><th>Trạng thái</th><th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+    <tr>
+      <td>{{ appt.ten_bac_si }}</td>
+      <td>{{ appt.ngay_hen }}</td>
+      <td>{{ appt.gio_hen }}</td>
+      <td>{{ appt.trang_thai }}</td>
+      <td>
+        {% if appt.trang_thai == 'Chờ khám' %}
+        <a href="/patient/appointments/{{ appt.ma_lich_hen }}/cancel" class="btn btn-sm btn-danger">Hủy</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 
