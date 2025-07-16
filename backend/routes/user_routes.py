@@ -16,6 +16,32 @@ def get_users():
         print("Lỗi lấy thông tin người dùng:", e)
         return jsonify({'error': str(e)}), 500
 
+
+@user_bp.route('/users/login', methods=['POST'])
+def login_user():
+    try:
+        data = request.json
+        email = data.get('email')
+        password = data.get('mat_khau')
+        if not email or not password:
+            return jsonify({'error': 'Vui lòng nhập email và mật khẩu'}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT email, ma_bac_si, ma_benh_nhan, role, created_at FROM nguoi_dung WHERE email = %s AND mat_khau = %s"
+        cursor.execute(sql, (email, password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            return jsonify({'message': 'Đăng nhập thành công', 'user': user}), 200
+        else:
+            return jsonify({'error': 'Sai thông tin đăng nhập'}), 401
+    except Exception as e:
+        print("Lỗi đăng nhập:", e)
+        return jsonify({'error': str(e)}), 500
+
+
 @user_bp.route('/users', methods=['POST'])
 def add_user():
     try:
