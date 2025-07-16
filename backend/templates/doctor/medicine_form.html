@@ -1,0 +1,25 @@
+{% extends 'base_doctor.html' %}
+{% block title %}{{ 'Sửa' if medicine else 'Thêm' }} Thuốc{% endblock %}
+{% block content %}
+<h2>{{ 'Sửa' if medicine else 'Thêm' }} Thuốc</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Mã thuốc</label>
+    <input type="text" class="form-control" name="ma_thuoc" value="{{ medicine.ma_thuoc if medicine else '' }}" {% if medicine %}readonly{% endif %} required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Tên thuốc</label>
+    <input type="text" class="form-control" name="ten_thuoc" value="{{ medicine.ten_thuoc if medicine else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Đơn vị</label>
+    <input type="text" class="form-control" name="don_vi" value="{{ medicine.don_vi if medicine else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Giá</label>
+    <input type="number" class="form-control" name="gia" value="{{ medicine.gia if medicine else '' }}" step="0.01">
+  </div>
+  <button type="submit" class="btn btn-primary">Lưu</button>
+  <a href="/doctor/medicines" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %} 

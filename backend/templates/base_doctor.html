@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Bác sĩ - Phòng Khám{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/doctor/profile">Bác sĩ</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/doctor/profile">Thông tin cá nhân</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctor/appointments">Lịch hẹn</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctor/examinations/history">Lịch sử khám</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctor/medicines">Quản lý thuốc</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctor/departments">Chuyên khoa</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctor/statistics">Thống kê</a></li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/logout">Đăng xuất</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html> 

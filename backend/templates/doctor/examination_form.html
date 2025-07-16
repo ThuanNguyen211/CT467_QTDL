@@ -1,0 +1,24 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Tạo Phiếu Khám{% endblock %}
+{% block content %}
+<h2>Tạo Phiếu Khám</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Mã phiếu khám</label>
+    <input type="text" class="form-control" name="ma_phieu_kham" value="{{ examination.ma_phieu_kham if examination else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Triệu chứng</label>
+    <textarea class="form-control" name="trieu_chung">{{ examination.trieu_chung if examination else '' }}</textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Chẩn đoán</label>
+    <textarea class="form-control" name="chan_doan">{{ examination.chan_doan if examination else '' }}</textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Ngày khám</label>
+    <input type="date" class="form-control" name="ngay_kham" value="{{ examination.ngay_kham if examination else '' }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Lưu phiếu khám</button>
+</form>
+{% endblock %} 

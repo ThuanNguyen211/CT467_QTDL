@@ -1,0 +1,28 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Thông tin Bác sĩ{% endblock %}
+{% block content %}
+<h2>Thông tin cá nhân</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Mã bác sĩ</label>
+    <input type="text" class="form-control" name="ma_bac_si" value="{{ doctor.ma_bac_si }}" readonly>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Tên bác sĩ</label>
+    <input type="text" class="form-control" name="ten_bac_si" value="{{ doctor.ten_bac_si }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Chuyên khoa</label>
+    <input type="text" class="form-control" name="chuyen_khoa" value="{{ doctor.ten_chuyen_khoa }}" readonly>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Số điện thoại</label>
+    <input type="text" class="form-control" name="so_dien_thoai" value="{{ doctor.so_dien_thoai }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Kinh nghiệm (năm)</label>
+    <input type="number" class="form-control" name="kinh_nghiem" value="{{ doctor.kinh_nghiem }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Cập nhật</button>
+</form>
+{% endblock %} 

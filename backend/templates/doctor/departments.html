@@ -1,0 +1,23 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Danh sách Chuyên khoa{% endblock %}
+{% block content %}
+<h2>Danh sách Chuyên khoa</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mã</th><th>Tên chuyên khoa</th><th>Mô tả</th><th>SĐT</th><th>Kinh nghiệm</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dept in departments %}
+    <tr>
+      <td>{{ dept.ma_chuyen_khoa }}</td>
+      <td>{{ dept.ten_chuyen_khoa }}</td>
+      <td>{{ dept.mo_ta }}</td>
+      <td>{{ dept.so_dien_thoai }}</td>
+      <td>{{ dept.kinh_nghiem }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 

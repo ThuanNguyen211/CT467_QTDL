@@ -1,0 +1,9 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Thống kê Bác sĩ{% endblock %}
+{% block content %}
+<h2>Thống kê cá nhân</h2>
+<ul class="list-group mb-3">
+  <li class="list-group-item">Số bệnh nhân đã khám: <strong>{{ stats.so_benh_nhan }}</strong></li>
+  <li class="list-group-item">Doanh thu: <strong>{{ stats.doanh_thu }} VNĐ</strong></li>
+</ul>
+{% endblock %} 

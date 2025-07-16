@@ -1,0 +1,28 @@
+{% extends 'base_patient.html' %}
+{% block title %}Đặt Lịch Khám{% endblock %}
+{% block content %}
+<h2>Đặt Lịch Khám</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Chọn bác sĩ</label>
+    <select class="form-select" name="ma_bac_si" required>
+      {% for doctor in doctors %}
+      <option value="{{ doctor.ma_bac_si }}">{{ doctor.ten_bac_si }} ({{ doctor.ten_chuyen_khoa }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Ngày khám</label>
+    <input type="date" class="form-control" name="ngay_hen" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Giờ khám</label>
+    <select class="form-select" name="gio_hen" required>
+      {% for slot in available_times %}
+      <option value="{{ slot }}">{{ slot }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Đặt lịch</button>
+</form>
+{% endblock %} 

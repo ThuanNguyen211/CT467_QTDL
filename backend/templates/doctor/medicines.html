@@ -1,0 +1,27 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Quản lý Thuốc{% endblock %}
+{% block content %}
+<h2>Quản lý Thuốc</h2>
+<a href="/doctor/medicines/new" class="btn btn-success mb-3">Thêm thuốc</a>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mã</th><th>Tên thuốc</th><th>Đơn vị</th><th>Giá</th><th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for medicine in medicines %}
+    <tr>
+      <td>{{ medicine.ma_thuoc }}</td>
+      <td>{{ medicine.ten_thuoc }}</td>
+      <td>{{ medicine.don_vi }}</td>
+      <td>{{ medicine.gia }}</td>
+      <td>
+        <a href="/doctor/medicines/{{ medicine.ma_thuoc }}/edit" class="btn btn-sm btn-warning">Sửa</a>
+        <a href="/doctor/medicines/{{ medicine.ma_thuoc }}/delete" class="btn btn-sm btn-danger">Xóa</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 
