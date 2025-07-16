@@ -38,37 +38,24 @@ def add_medicine():
     """Thêm thuốc mới"""
     try:
         data = request.json
-        
-        # Kiểm tra dữ liệu bắt buộc
-        required_fields = ['ma_thuoc', 'ten_thuoc']
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return jsonify({'error': f'Trường {field} là bắt buộc'}), 400
-        
+
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Kiểm tra mã thuốc đã tồn tại chưa
-        cursor.execute("SELECT ma_thuoc FROM thuoc WHERE ma_thuoc = %s", (data['ma_thuoc'],))
-        if cursor.fetchone():
-            conn.close()
-            return jsonify({'error': 'Mã thuốc đã tồn tại'}), 400
-        
         # Thêm thuốc
         sql = """
-            INSERT INTO thuoc (ma_thuoc, ten_thuoc, don_vi, gia)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO thuoc (ten_thuoc, don_vi, gia)
+            VALUES (%s, %s, %s)
         """
         cursor.execute(sql, (
-            data['ma_thuoc'],
             data['ten_thuoc'],
-            data.get('don_vi'),
-            data.get('gia')
+            data['don_vi'],
+            data['gia']
         ))
         conn.commit()
         conn.close()
         
-        return jsonify({'message': 'Thêm thuốc thành công', 'ma_thuoc': data['ma_thuoc']}), 201
+        return jsonify({'message': 'Thêm thuốc thành công'}), 201
     except Exception as e:
         return jsonify({'error': f'Lỗi khi thêm thuốc: {str(e)}'}), 500
 

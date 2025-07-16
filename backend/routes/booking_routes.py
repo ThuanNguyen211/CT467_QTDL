@@ -27,11 +27,10 @@ def add_booking():
     cursor = conn.cursor()
 
     sql = """
-        INSERT INTO lich_hen (ma_lich_hen, ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai)
+        VALUES (%s, %s, %s, %s, %s)
     """
     cursor.execute(sql, (
-        data['ma_lich_hen'],
         data['ma_benh_nhan'],
         data['ma_bac_si'],
         data['ngay_hen'],
@@ -53,15 +52,13 @@ def update_booking(ma_lich_hen):
 
     sql = """
         UPDATE lich_hen
-        SET ma_benh_nhan = %s,
-            ma_bac_si = %s,
+        SET ma_bac_si = %s,
             ngay_hen = %s,
             gio_hen = %s,
             trang_thai = %s
         WHERE ma_lich_hen = %s
     """
     cursor.execute(sql, (
-        data['ma_benh_nhan'],
         data['ma_bac_si'],
         data['ngay_hen'],
         data['gio_hen'],

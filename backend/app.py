@@ -6,7 +6,6 @@ from routes.medical_exam_routes import medical_exam_bp
 from routes.user_routes import user_bp
 from routes.prescription_routes import prescription_bp
 from routes.specialty_routes import specialty_bp
-from routes.features import appointment_bp
 
 
 app = Flask(__name__)
@@ -19,7 +18,6 @@ app.register_blueprint(medical_exam_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(prescription_bp)
 app.register_blueprint(specialty_bp)
-app.register_blueprint(appointment_bp)
 
 if __name__ == '__main__':
     app.run(port=5000)

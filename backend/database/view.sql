@@ -2,7 +2,7 @@ USE phong_kham;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS DanhSachKhungGioTrong $$
-CREATE PROCEDURE DanhSachKhungGioTrong(IN ma_bac_si VARCHAR(10), IN ngay DATE)
+CREATE PROCEDURE DanhSachKhungGioTrong(IN ma_bac_si INT, IN ngay DATE)
 BEGIN
     SET @start_hour = 8;
     SET @end_hour = 17;
@@ -34,7 +34,7 @@ DELIMITER ;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS LichSuKhamBenhNhan $$
-CREATE PROCEDURE LichSuKhamBenhNhan(IN ma_benh_nhan VARCHAR(10), IN ngay DATE)
+CREATE PROCEDURE LichSuKhamBenhNhan(IN ma_benh_nhan INT, IN ngay DATE)
 BEGIN
     SELECT pk.*, lh.ngay_hen, lh.gio_hen, lh.trang_thai, bs.ten_bac_si
     FROM benh_nhan bn
