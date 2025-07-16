@@ -23,11 +23,10 @@ def add_prescription():
         conn = get_connection()
         cursor = conn.cursor()
         sql = """
-            INSERT INTO don_thuoc (ma_don_thuoc, ma_phieu_kham, ma_thuoc, so_luong, lieu_dung, cach_dung)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO don_thuoc (ma_phieu_kham, ma_thuoc, so_luong, lieu_dung, cach_dung)
+            VALUES (%s, %s, %s, %s, %s)
             """
         cursor.execute(sql, (
-            data['ma_don_thuoc'],
             data['ma_phieu_kham'],
             data['ma_thuoc'],
             data['so_luong'],
@@ -49,15 +48,13 @@ def update_prescription(ma_don_thuoc):
         cursor = conn.cursor()
         sql = """
             UPDATE don_thuoc
-            SET ma_phieu_kham = %s,
-                ma_thuoc = %s,
+            SET ma_thuoc = %s,
                 so_luong = %s,
                 lieu_dung = %s,
                 cach_dung = %s
             WHERE ma_don_thuoc = %s
         """
         cursor.execute(sql, (
-            data['ma_phieu_kham'],
             data['ma_thuoc'],
             data['so_luong'],
             data['lieu_dung'],

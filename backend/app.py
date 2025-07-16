@@ -12,6 +12,7 @@ from routes.web_routes import web_bp
 
 
 
+
 app = Flask(__name__)
 CORS(app)
 
@@ -25,7 +26,6 @@ app.register_blueprint(specialty_bp)
 app.register_blueprint(medicine_bp)
 app.register_blueprint(patient_bp)
 app.register_blueprint(web_bp)
-
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

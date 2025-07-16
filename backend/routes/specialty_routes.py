@@ -34,9 +34,8 @@ def add_specialty():
         data = request.get_json()
         conn = get_connection()
         cursor = conn.cursor()
-        sql = "INSERT INTO chuyen_khoa (ma_chuyen_khoa, ten_chuyen_khoa, mo_ta) VALUES (%s, %s, %s)"
+        sql = "INSERT INTO chuyen_khoa (ten_chuyen_khoa, mo_ta) VALUES (%s, %s)"
         cursor.execute(sql, (
-            data['ma_chuyen_khoa'],
             data['ten_chuyen_khoa'],
             data['mo_ta']
         ))
