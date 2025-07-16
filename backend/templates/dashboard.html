@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="row g-3">
+  <div class="col-md-3"><a href="/doctors" class="btn btn-outline-primary w-100">Quản lý Bác sĩ</a></div>
+  <div class="col-md-3"><a href="/patients" class="btn btn-outline-primary w-100">Quản lý Bệnh nhân</a></div>
+  <div class="col-md-3"><a href="/departments" class="btn btn-outline-primary w-100">Quản lý Chuyên khoa</a></div>
+  <div class="col-md-3"><a href="/appointments" class="btn btn-outline-primary w-100">Đặt lịch hẹn</a></div>
+  <div class="col-md-3"><a href="/medicines" class="btn btn-outline-primary w-100">Quản lý Thuốc</a></div>
+  <div class="col-md-3"><a href="/statistics" class="btn btn-outline-primary w-100">Thống kê</a></div>
+  <div class="col-md-3"><a href="/users" class="btn btn-outline-primary w-100">Quản lý Tài khoản</a></div>
+</div>
+{% endblock %} 

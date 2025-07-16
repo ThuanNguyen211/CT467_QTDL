@@ -1,0 +1,23 @@
+{% extends 'base_patient.html' %}
+{% block title %}Lịch sử Khám bệnh{% endblock %}
+{% block content %}
+<h2>Lịch sử Khám bệnh</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Mã phiếu</th><th>Bác sĩ</th><th>Ngày khám</th><th>Triệu chứng</th><th>Chẩn đoán</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for exam in examinations %}
+    <tr>
+      <td>{{ exam.ma_phieu_kham }}</td>
+      <td>{{ exam.ten_bac_si }}</td>
+      <td>{{ exam.ngay_kham }}</td>
+      <td>{{ exam.trieu_chung }}</td>
+      <td>{{ exam.chan_doan }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %} 
