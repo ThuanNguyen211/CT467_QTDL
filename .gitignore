@@ -1,8 +1,8 @@
 gitignore
 
 __pycache__
-app.py
-db.py
+# app.py
+# db.py
 .idea/
 venv/
 backend/__pycache__/
