@@ -39,27 +39,14 @@ def add_patient():
     try:
         data = request.json
         
-        # Kiểm tra dữ liệu bắt buộc
-        required_fields = ['ma_benh_nhan', 'ten_benh_nhan']
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return jsonify({'error': f'Trường {field} là bắt buộc'}), 400
-        
         conn = get_connection()
         cursor = conn.cursor()
         
-        # Kiểm tra mã bệnh nhân đã tồn tại chưa
-        cursor.execute("SELECT ma_benh_nhan FROM benh_nhan WHERE ma_benh_nhan = %s", (data['ma_benh_nhan'],))
-        if cursor.fetchone():
-            conn.close()
-            return jsonify({'error': 'Mã bệnh nhân đã tồn tại'}), 400
-        
         sql = """
-            INSERT INTO benh_nhan (ma_benh_nhan, ten_benh_nhan, ngay_sinh, so_dien_thoai, dia_chi, tien_su_benh)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO benh_nhan (ten_benh_nhan, ngay_sinh, so_dien_thoai, dia_chi, tien_su_benh)
+            VALUES (%s, %s, %s, %s, %s)
         """
         cursor.execute(sql, (
-            data['ma_benh_nhan'],
             data['ten_benh_nhan'],
             data.get('ngay_sinh'),
             data.get('so_dien_thoai'),
@@ -69,7 +56,7 @@ def add_patient():
         conn.commit()
         conn.close()
         
-        return jsonify({'message': 'Thêm bệnh nhân thành công', 'ma_benh_nhan': data['ma_benh_nhan']}), 201
+        return jsonify({'message': 'Thêm bệnh nhân thành công'}), 201
     except Exception as e:
         return jsonify({'error': f'Lỗi khi thêm bệnh nhân: {str(e)}'}), 500
 

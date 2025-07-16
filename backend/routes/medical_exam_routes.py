@@ -27,11 +27,10 @@ def add_medical_exam():
     cursor = conn.cursor()
 
     sql = """
-        INSERT INTO phieu_kham (ma_phieu_kham, ma_lich_hen, trieu_chung, chan_doan, ngay_kham)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO phieu_kham (ma_lich_hen, trieu_chung, chan_doan, ngay_kham)
+        VALUES (%s, %s, %s, %s)
     """
     cursor.execute(sql, (
-        data['ma_phieu_kham'],
         data['ma_lich_hen'],
         data['trieu_chung'],
         data['chan_doan'],
@@ -51,14 +50,12 @@ def update_medical_exam(ma_phieu_kham):
 
     sql = """
         UPDATE phieu_kham
-        SET ma_lich_hen = %s,
-            trieu_chung = %s,
+        SET trieu_chung = %s,
             chan_doan = %s,
             ngay_kham = %s
         WHERE ma_phieu_kham = %s
     """
     cursor.execute(sql, (
-        data['ma_lich_hen'],
         data['trieu_chung'],
         data['chan_doan'],
         data['ngay_kham'],

@@ -2,6 +2,16 @@ from flask import Blueprint, render_template, redirect, url_for
 
 web_bp = Blueprint('web', __name__)
 
+# -- Home ---
+@web_bp.route('/')
+def home():
+    return render_template('home.html')
+
+@web_bp.route('/login')
+def login():
+    return render_template('login.html')
+
+
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
 def doctor_profile():
