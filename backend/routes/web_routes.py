@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for
+import requests
 
 web_bp = Blueprint('web', __name__)
 
@@ -11,6 +12,11 @@ def home():
 def login():
     return render_template('login.html')
 
+@web_bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
+
 
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
@@ -19,7 +25,14 @@ def doctor_profile():
 
 @web_bp.route('/doctor/medicines')
 def doctor_medicines():
-    return render_template('doctor/medicines.html', medicines=[])
+    try:
+        response = requests.get('http://localhost:5000/medicines')
+        response.raise_for_status()
+        medicines = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Lỗi khi gọi API: {e}")
+        medicines = []
+    return render_template('doctor/medicines.html', medicines=medicines)
 
 @web_bp.route('/doctor/medicines/new', methods=['GET', 'POST'])
 def doctor_medicine_new():
@@ -47,7 +60,14 @@ def doctor_prescription_new():
 
 @web_bp.route('/doctor/examinations/history')
 def doctor_examinations_history():
-    return render_template('doctor/examinations.html', examinations=[])
+    try:
+        response = requests.get('http://localhost:5000/medical_exams')
+        response.raise_for_status()
+        medical_exams= response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Lỗi khi gọi API: {e}")
+        medical_exams = []
+    return render_template('doctor/examinations.html', examinations= medical_exams)
 
 @web_bp.route('/doctor/statistics')
 def doctor_statistics():

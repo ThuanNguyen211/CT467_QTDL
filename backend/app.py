@@ -14,6 +14,7 @@ from routes.web_routes import web_bp
 
 
 app = Flask(__name__)
+app.secret_key = 'qtdl_2024_secret'
 CORS(app)
 
 # Đăng ký Blueprint
