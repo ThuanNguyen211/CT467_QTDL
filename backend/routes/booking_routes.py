@@ -112,3 +112,31 @@ def get_available_slots():
     except Exception as e:
         print("Lỗi lấy danh sách khung giờ trống:", e)
         return jsonify({'error': str(e)}), 500
+    
+@booking_bp.route('/booking/my_booking', methods=['GET'])
+def get_my_booking():
+    try:
+        ma_benh_nhan = request.args.get('ma_benh_nhan')
+        
+        if not ma_benh_nhan:
+            return jsonify({'error': 'Thiếu tham số ma_benh_nhan'}), 400
+            
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('LichHenCuaToi', (ma_benh_nhan,))
+        
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+            
+        conn.close()
+
+        for row in data:
+            for key, value in row.items():
+                if isinstance(value, (timedelta, datetime)):
+                    row[key] = str(value)
+                    
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi lấy lich hen:", e)
+        return jsonify({'error': str(e)}), 500
