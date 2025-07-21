@@ -14,8 +14,7 @@ def login():
 
 @web_bp.route('/logout')
 def logout():
-    session.clear()
-    return redirect('/login')
+    return render_template('login.html')
 
 
 # ----------- BÁC SĨ -------------

@@ -7,3 +7,4 @@ backend/db.py
 .idea/
 venv/
 backend/__pycache__/
+frontend/__pycache__/
