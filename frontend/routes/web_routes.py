@@ -34,14 +34,17 @@ def doctor_medicines():
     return render_template('doctor/medicines.html', medicines=medicines)
 
 
-# Thêm thuốc
+# Thêm thuốc (Tín)
 @web_bp.route('/doctor/medicines/new', methods=['GET', 'POST'])
 def doctor_medicine_new():
     return render_template('doctor/medicine_form.html', medicine=None)
 
+
+
+
 @web_bp.route('/doctor/medicines/<ma_thuoc>/edit', methods=['GET', 'POST'])
 def doctor_medicine_edit(ma_thuoc):
-    return render_template('doctor/medicine_form.html', medicine={})
+    return render_template('doctor/medicine_form.html', medicine_id=ma_thuoc)
 
 @web_bp.route('/doctor/departments')
 def doctor_departments():

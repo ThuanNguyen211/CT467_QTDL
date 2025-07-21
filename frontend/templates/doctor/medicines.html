@@ -1,12 +1,15 @@
-{% extends 'base_doctor.html' %}
-{% block title %}Quản lý Thuốc{% endblock %}
-{% block content %}
+{% extends 'base_doctor.html' %} {% block title %}Quản lý Thuốc{% endblock %} {%
+block content %}
 <h2>Quản lý Thuốc</h2>
 <a href="/doctor/medicines/new" class="btn btn-success mb-3">Thêm thuốc</a>
 <table class="table table-bordered">
   <thead>
     <tr>
-      <th>Mã</th><th>Tên thuốc</th><th>Đơn vị</th><th>Giá</th><th>Hành động</th>
+      <th>Mã</th>
+      <th>Tên thuốc</th>
+      <th>Đơn vị</th>
+      <th>Giá</th>
+      <th>Hành động</th>
     </tr>
   </thead>
 
@@ -18,14 +21,51 @@
       <td>{{ medicine.don_vi }}</td>
       <td>{{ medicine.gia }}</td>
       <td>
-        <a href="/doctor/medicines/{{ medicine.ma_thuoc }}/edit" class="btn btn-sm btn-warning">Sửa</a>
-        <a href="/doctor/medicines/{{ medicine.ma_thuoc }}/delete" class="btn btn-sm btn-danger">Xóa</a>
+        <a
+          href="/doctor/medicines/{{ medicine.ma_thuoc }}/edit"
+          class="btn btn-sm btn-warning"
+          >Sửa</a
+        >
+        <button
+          class="btn btn-sm btn-danger btn-delete"
+          data-id="{{ medicine.ma_thuoc }}"
+        >
+          Xóa
+        </button>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 <script>
-  const medicine = {{ medicines | tojson }};
+  const medicines = {{ medicines | tojson }};
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteButtons = document.querySelectorAll(".btn-delete");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const maThuoc = this.getAttribute("data-id");
+
+        if (!confirm("Bạn có chắc muốn xóa thuốc này?")) return;
+
+        fetch(`http://127.0.0.1:5000/medicines/${maThuoc}`, {
+          method: "DELETE",
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.message) {
+              alert("✅ " + res.message);
+              location.reload();
+            } else {
+              alert("❌ " + (res.error || "Lỗi không xác định"));
+            }
+          })
+          .catch((err) => {
+            alert("❌ Lỗi khi gửi yêu cầu xóa: " + err);
+          });
+      });
+    });
+  });
 </script>
-{% endblock %} 
+{% endblock %}
