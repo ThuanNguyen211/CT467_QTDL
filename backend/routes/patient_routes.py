@@ -150,3 +150,26 @@ def search_patients():
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': f'Lỗi khi tìm kiếm bệnh nhân: {str(e)}'}), 500
+    
+@patient_bp.route('/patients/history', methods=['GET'])
+def get_patient_history():
+    try:
+        ma_benh_nhan = request.args.get('ma_benh_nhan')
+        ngay = request.args.get('ngay')
+        
+        if not ma_benh_nhan or not ngay:
+            return jsonify({'error': 'Thiếu tham số ma_benh_nhan hoặc ngay'}), 400
+            
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('LichSuKhamBenhNhan', (ma_benh_nhan, ngay))
+        
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+            
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi lấy lịch sử khám bệnh:", e)
+        return jsonify({'error': str(e)}), 500
