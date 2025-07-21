@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request
+from flask import session
 import requests
 
 web_bp = Blueprint('web', __name__)
@@ -21,7 +22,8 @@ def logout():
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
 def doctor_profile():
-    return render_template('doctor/profile.html', doctor={})
+    return render_template('doctor/profile.html')
+
 
 @web_bp.route('/doctor/medicines')
 def doctor_medicines():
@@ -50,7 +52,16 @@ def doctor_departments():
 
 @web_bp.route('/doctor/appointments')
 def doctor_appointments():
-    return render_template('doctor/appointments.html', appointments=[], date='', status='')
+    ma_bac_si = session.get('ma_bac_si')
+    appointments = []
+    if ma_bac_si:
+        try:
+            response = requests.get(f'http://localhost:5000/appointments?ma_bac_si={ma_bac_si}')
+            response.raise_for_status()
+            appointments = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Lỗi khi gọi API: {e}")
+    return render_template('doctor/appointments.html', appointments=appointments)
 
 @web_bp.route('/doctor/examinations/new', methods=['GET', 'POST'])
 def doctor_examination_new():

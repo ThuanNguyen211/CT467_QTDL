@@ -2,27 +2,69 @@
 {% block title %}Thông tin Bác sĩ{% endblock %}
 {% block content %}
 <h2>Thông tin cá nhân</h2>
-<form method="post">
-  <div class="mb-3">
-    <label class="form-label">Mã bác sĩ</label>
-    <input type="text" class="form-control" name="ma_bac_si" value="{{ doctor.ma_bac_si }}" readonly>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Tên bác sĩ</label>
-    <input type="text" class="form-control" name="ten_bac_si" value="{{ doctor.ten_bac_si }}">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Chuyên khoa</label>
-    <input type="text" class="form-control" name="chuyen_khoa" value="{{ doctor.ten_chuyen_khoa }}" readonly>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Số điện thoại</label>
-    <input type="text" class="form-control" name="so_dien_thoai" value="{{ doctor.so_dien_thoai }}">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Kinh nghiệm (năm)</label>
-    <input type="number" class="form-control" name="kinh_nghiem" value="{{ doctor.kinh_nghiem }}">
-  </div>
-  <button type="submit" class="btn btn-primary">Cập nhật</button>
-</form>
-{% endblock %} 
+<div id="doctor-info"></div>
+<script>
+  var ma_bac_si = localStorage.getItem('ma_bac_si');
+  console.log("ma_bac_si trong localStorage:", ma_bac_si);
+
+  if (ma_bac_si) {
+    fetch('http://localhost:5000/doctors/' + ma_bac_si)
+      .then(response => {
+        console.log("Status API:", response.status);
+        return response.json();
+      })
+      .then(doctor => {
+        console.log("Dữ liệu trả về từ API:", doctor);
+        document.getElementById('doctor-info').innerHTML = `
+          <form id="update-form">
+            <div class="mb-3">
+              <label class="form-label">Mã bác sĩ</label>
+              <input type="text" class="form-control" name="ma_bac_si" value="${doctor.ma_bac_si}" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tên bác sĩ</label>
+              <input type="text" class="form-control" name="ten_bac_si" value="${doctor.ten_bac_si}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Chuyên khoa</label>
+              <input type="text" class="form-control" name="ten_chuyen_khoa" value="${doctor.ten_chuyen_khoa}" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Số điện thoại</label>
+              <input type="text" class="form-control" name="so_dien_thoai" value="${doctor.so_dien_thoai}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Kinh nghiệm (năm)</label>
+              <input type="number" class="form-control" name="kinh_nghiem" value="${doctor.kinh_nghiem}">
+            </div>
+            <button type="submit" class="btn btn-primary">Cập nhật</button>
+          </form>
+        `;
+        // Chặn submit mặc định và xử lý PUT
+        document.getElementById('update-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          console.log("Đã chặn submit, chuẩn bị gửi PUT!");
+          // Lấy dữ liệu từ form
+          const data = {
+            ten_bac_si: document.querySelector('input[name="ten_bac_si"]').value,
+            ma_chuyen_khoa: doctor.ma_chuyen_khoa, // lấy từ object doctor đã fetch về
+            so_dien_thoai: document.querySelector('input[name="so_dien_thoai"]').value,
+            kinh_nghiem: document.querySelector('input[name="kinh_nghiem"]').value
+          };
+          fetch('http://localhost:5000/doctors/' + ma_bac_si, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          })
+            .then(res => res.json())
+            .then(result => {
+              alert(result.message || "Cập nhật thành công!");
+            });
+        });
+      });
+  } else {
+    console.error("Không tìm thấy mã bác sĩ trong localStorage");
+    document.getElementById('doctor-info').innerHTML = "<p>Không tìm thấy thông tin bác sĩ.</p>";
+  }
+</script>
+{% endblock %}
