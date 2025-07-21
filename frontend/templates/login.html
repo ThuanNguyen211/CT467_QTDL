@@ -31,6 +31,7 @@ document.getElementById('loginForm').onsubmit = async function(e) {
     body: JSON.stringify(data)
   });
   const result = await response.json();
+  console.log(result)
   if (result.user) {
     localStorage.setItem('email', result.user.email);
     localStorage.setItem('role', result.user.role);
