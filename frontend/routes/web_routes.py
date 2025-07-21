@@ -12,10 +12,6 @@ def home():
 def login():
     return render_template('login.html')
 
-@web_bp.route('/logout')
-def logout():
-    return render_template('login.html')
-
 
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
