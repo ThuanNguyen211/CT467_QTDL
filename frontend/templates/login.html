@@ -32,13 +32,18 @@ document.getElementById('loginForm').onsubmit = async function(e) {
   });
   const result = await response.json();
   if (result.user) {
+    localStorage.setItem('email', result.user.email);
+    localStorage.setItem('role', result.user.role);
     if (result.user.role === 'bac_si') {
+      localStorage.setItem('ma_bac_si', result.user.ma_bac_si);
       window.location.href = '/doctor/profile';
     } else if (result.user.role === 'benh_nhan') {
+      localStorage.setItem('ma_benh_nhan', result.user.ma_benh_nhan);
       window.location.href = '/patient/appointments';
     } else {
       alert('Role không hợp lệ!');
     }
+    
   } else {
     alert(result.error || 'Đăng nhập thất bại!');
   }
