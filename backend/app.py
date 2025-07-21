@@ -8,13 +8,8 @@ from routes.prescription_routes import prescription_bp
 from routes.specialty_routes import specialty_bp
 from routes.medicine_routes import medicine_bp
 from routes.patient_routes import patient_bp
-from frontend.routes.web_routes import web_bp
-
-
-
 
 app = Flask(__name__)
-app.secret_key = 'qtdl_2024_secret'
 CORS(app)
 
 # Đăng ký Blueprint
@@ -26,7 +21,6 @@ app.register_blueprint(prescription_bp)
 app.register_blueprint(specialty_bp)
 app.register_blueprint(medicine_bp)
 app.register_blueprint(patient_bp)
-app.register_blueprint(web_bp)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
