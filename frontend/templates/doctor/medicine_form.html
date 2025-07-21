@@ -1,25 +1,96 @@
-{% extends 'base_doctor.html' %}
-{% block title %}{{ 'Sửa' if medicine else 'Thêm' }} Thuốc{% endblock %}
-{% block content %}
-<h2>{{ 'Sửa' if medicine else 'Thêm' }} Thuốc</h2>
-<form method="post">
+{% extends 'base_doctor.html' %} {% block title %}{{ 'Sửa' if medicine else
+'Thêm' }} Thuốc{% endblock %} {% block content %}
+<h2>{{ 'Sửa' if medicine_id else 'Thêm' }} Thuốc</h2>
+<form method="post" id="form">
   <div class="mb-3">
-    <label class="form-label">Mã thuốc</label>
-    <input type="text" class="form-control" name="ma_thuoc" value="{{ medicine.ma_thuoc if medicine else '' }}" {% if medicine %}readonly{% endif %} required>
+    {% if medicine %}
+    <input type="hidden" name="ma_thuoc" value="{{ medicine.ma_thuoc }}" />
+    {% endif %}
   </div>
   <div class="mb-3">
     <label class="form-label">Tên thuốc</label>
-    <input type="text" class="form-control" name="ten_thuoc" value="{{ medicine.ten_thuoc if medicine else '' }}" required>
+    <input
+      type="text"
+      class="form-control"
+      name="ten_thuoc"
+      value="{{ medicine.ten_thuoc if medicine else '' }}"
+      required
+    />
   </div>
   <div class="mb-3">
     <label class="form-label">Đơn vị</label>
-    <input type="text" class="form-control" name="don_vi" value="{{ medicine.don_vi if medicine else '' }}">
+    <input
+      type="text"
+      class="form-control"
+      name="don_vi"
+      value="{{ medicine.don_vi if medicine else '' }}"
+    />
   </div>
   <div class="mb-3">
     <label class="form-label">Giá</label>
-    <input type="number" class="form-control" name="gia" value="{{ medicine.gia if medicine else '' }}" step="0.01">
+    <input
+      type="number"
+      class="form-control"
+      name="gia"
+      value="{{ medicine.gia if medicine else '' }}"
+      step="0.01"
+    />
   </div>
   <button type="submit" class="btn btn-primary">Lưu</button>
   <a href="/doctor/medicines" class="btn btn-secondary">Hủy</a>
 </form>
-{% endblock %} 
+
+<script>
+  const medicine_id = "{{ medicine_id | safe }}"; // Jinja sẽ render ID vào đây
+  const isEdit = Boolean(medicine_id);
+  document.addEventListener("DOMContentLoaded", function () {
+    if (medicine_id) {
+      fetch(`http://localhost:5000/medicines/${medicine_id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.ma_thuoc) {
+            document.querySelector('[name="ten_thuoc"]').value =
+              data.ten_thuoc || "";
+            document.querySelector('[name="don_vi"]').value = data.don_vi || "";
+            document.querySelector('[name="gia"]').value = data.gia || "";
+          } else {
+            alert("❌ Không tìm thấy thuốc");
+          }
+        })
+        .catch((err) => alert("❌ Lỗi khi tải dữ liệu thuốc: " + err));
+    }
+
+    document.getElementById("form").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const data = {
+        ten_thuoc: document.querySelector('[name="ten_thuoc"]').value,
+        don_vi: document.querySelector('[name="don_vi"]').value,
+        gia: parseFloat(document.querySelector('[name="gia"]').value) || 0,
+      };
+
+      const method = isEdit ? "PUT" : "POST";
+      const endpoint = isEdit
+        ? `http://localhost:5000/medicines/${medicine_id}`
+        : "http://localhost:5000/medicines";
+
+      fetch(endpoint, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.message) {
+            alert("✅ " + res.message);
+            window.location.href = "/doctor/medicines";
+          } else {
+            alert("❌ " + res.error);
+          }
+        })
+        .catch((err) => alert("❌ Có lỗi xảy ra: " + err));
+    });
+  });
+</script>
+
+{% endblock %}

@@ -59,6 +59,8 @@ def add_medicine():
     except Exception as e:
         return jsonify({'error': f'Lỗi khi thêm thuốc: {str(e)}'}), 500
 
+
+
 @medicine_bp.route('/medicines/<ma_thuoc>', methods=['PUT'])
 def update_medicine(ma_thuoc):
     """Cập nhật thông tin thuốc"""
@@ -101,6 +103,9 @@ def update_medicine(ma_thuoc):
         return jsonify({'message': 'Cập nhật thuốc thành công'})
     except Exception as e:
         return jsonify({'error': f'Lỗi khi cập nhật thuốc: {str(e)}'}), 500
+
+
+
 
 @medicine_bp.route('/medicines/<ma_thuoc>', methods=['DELETE'])
 def delete_medicine(ma_thuoc):
