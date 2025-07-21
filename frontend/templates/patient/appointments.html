@@ -25,4 +25,31 @@
     {% endfor %}
   </tbody>
 </table>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+  const ma_benh_nhan = localStorage.getItem('ma_benh_nhan');
+  if (!ma_benh_nhan) {
+    alert('Không tìm thấy mã bệnh nhân!');
+    return;
+  }
+  const response = await fetch(`http://127.0.0.1:5000/booking/my_booking?ma_benh_nhan=${ma_benh_nhan}`);
+  const data = await response.json();
+
+  const tbody = document.querySelector('table tbody');
+  tbody.innerHTML = '';
+  data.forEach(appt => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${appt.ten_bac_si}</td>
+      <td>${appt.ngay_hen}</td>
+      <td>${appt.gio_hen}</td>
+      <td>${appt.trang_thai}</td>
+      <td>
+        ${appt.trang_thai === 'Chờ khám' ? `<a href="/patient/appointments/${appt.ma_lich_hen}/cancel" class="btn btn-sm btn-danger">Hủy</a>` : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+});
+</script>
 {% endblock %} 
