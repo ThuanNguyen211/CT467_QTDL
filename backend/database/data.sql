@@ -20,10 +20,10 @@ INSERT INTO thuoc (ten_thuoc, don_vi, gia) VALUES
 ('Amoxicillin', 'Hộp', 25000.0),
 ('Ibuprofen', 'Viên', 7000.0);
 
-INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai) VALUES
-(1, 1,'2025-07-12', '09:00:00', 'Chưa khám'),
-(2, 2,'2025-07-13', '14:00:00', 'Chưa khám'),
-(3, 3,'2025-07-14', '10:00:00', 'Chưa khám');
+INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen) VALUES
+(1, 1,'2025-07-12', '09:00:00'),
+(2, 2,'2025-07-13', '14:00:00'),
+(3, 3,'2025-07-14', '10:00:00');
 
 INSERT INTO phieu_kham (ma_lich_hen, trieu_chung, chan_doan, ngay_kham) VALUES
 (1, 'Sốt, ho', 'Cảm lạnh', '2025-07-12'),
