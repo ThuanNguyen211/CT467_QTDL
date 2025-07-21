@@ -34,6 +34,8 @@ def doctor_medicines():
         medicines = []
     return render_template('doctor/medicines.html', medicines=medicines)
 
+
+# Thêm thuốc
 @web_bp.route('/doctor/medicines/new', methods=['GET', 'POST'])
 def doctor_medicine_new():
     return render_template('doctor/medicine_form.html', medicine=None)
@@ -88,4 +90,4 @@ def patient_appointment_cancel(ma_lich_hen):
 
 @web_bp.route('/patient/examinations/history')
 def patient_examinations_history():
-    return render_template('patient/examinations.html', examinations=[]) 
+    return render_template('patient/examinations.html', examinations=[])

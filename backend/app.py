@@ -8,7 +8,7 @@ from routes.prescription_routes import prescription_bp
 from routes.specialty_routes import specialty_bp
 from routes.medicine_routes import medicine_bp
 from routes.patient_routes import patient_bp
-from routes.web_routes import web_bp
+from frontend.routes.web_routes import web_bp
 
 
 
