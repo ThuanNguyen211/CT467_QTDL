@@ -1,5 +1,4 @@
 # Bỏ qua thư mục
-gitignore
 
 __pycache__
 backend/app.py

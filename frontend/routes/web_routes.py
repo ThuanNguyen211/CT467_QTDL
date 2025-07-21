@@ -62,7 +62,7 @@ def doctor_prescription_new():
 @web_bp.route('/doctor/examinations/history')
 def doctor_examinations_history():
     try:
-        response = requests.get('http://localhost:5000/medical_exams')
+        response = requests.get('http://localhost:5000/doctors/patients')
         response.raise_for_status()
         medical_exams= response.json()
     except requests.exceptions.RequestException as e:
