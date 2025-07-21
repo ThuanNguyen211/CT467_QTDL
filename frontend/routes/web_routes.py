@@ -8,7 +8,7 @@ web_bp = Blueprint('web', __name__)
 def home():
     return render_template('home.html')
 
-@web_bp.route('/login')
+@web_bp.route('/users/login')
 def login():
     return render_template('login.html')
 
