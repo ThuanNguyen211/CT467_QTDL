@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <h3 class="mb-3">Đăng nhập</h3>
+    <form id="loginForm" method="post" action="/login">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      <div class="mb-3">
+        <label for="mat_khau" class="form-label">Mật khẩu</label>
+        <input type="password" class="form-control" id="mat_khau" name="mat_khau" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('loginForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const response = await fetch('/users/login', {
+    method: 'POST',
+    body: formData
+  });
+  const result = await response.json();
+  if (result.user) {
+    if (result.user.role === 'bac_si') {
+      window.location.href = '/doctor/profile';
+    } else if (result.user.role === 'benh_nhan') {
+      window.location.href = '/patient/appointments';
+    } else {
+      alert('Role không hợp lệ!');
+    }
+  } else {
+    alert(result.error || 'Đăng nhập thất bại!');
+  }
+};
+</script>
+{% endblock %} 
