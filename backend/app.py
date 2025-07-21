@@ -13,7 +13,6 @@ from routes.patient_routes import patient_bp
 
 
 app = Flask(__name__)
-app.secret_key = 'qtdl_2024_secret'
 CORS(app)
 
 # Đăng ký Blueprint
