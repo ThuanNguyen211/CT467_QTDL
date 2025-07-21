@@ -1,9 +1,9 @@
+# Bỏ qua thư mục
 gitignore
 
 __pycache__
-# app.py
-# db.py
+backend/app.py
+backend/db.py
 .idea/
 venv/
 backend/__pycache__/
-

@@ -2,7 +2,7 @@ USE phong_kham;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ThongKeBenhNhanBacSi $$
-CREATE PROCEDURE ThongKeBenhNhanBacSi(IN ma_bac_si VARCHAR(10), IN thang INT, IN nam INT)
+CREATE PROCEDURE ThongKeBenhNhanBacSi(IN ma_bac_si INT, IN thang INT, IN nam INT)
 BEGIN
     SELECT COUNT(DISTINCT lh.ma_benh_nhan) AS so_benh_nhan
     FROM bac_si bs
@@ -16,7 +16,7 @@ DELIMITER ;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ThongKeBenhNhanChuyenKhoa $$
-CREATE PROCEDURE ThongKeBenhNhanChuyenKhoa(IN ma_chuyen_khoa VARCHAR(10))
+CREATE PROCEDURE ThongKeBenhNhanChuyenKhoa(IN ma_chuyen_khoa INT)
 BEGIN
     SELECT COUNT(DISTINCT lh.ma_benh_nhan) AS so_benh_nhan
     FROM bac_si bs

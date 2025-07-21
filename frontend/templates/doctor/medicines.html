@@ -9,6 +9,7 @@
       <th>Mã</th><th>Tên thuốc</th><th>Đơn vị</th><th>Giá</th><th>Hành động</th>
     </tr>
   </thead>
+
   <tbody>
     {% for medicine in medicines %}
     <tr>
@@ -24,4 +25,7 @@
     {% endfor %}
   </tbody>
 </table>
+<script>
+  const medicine = {{ medicines | tojson }};
+</script>
 {% endblock %} 
