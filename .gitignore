@@ -4,7 +4,10 @@ gitignore
 __pycache__
 backend/app.py
 backend/db.py
+backend/__pycache__/
+frontend/routes/__pycache__/
 .idea/
 venv/
-backend/__pycache__/
-frontend/__pycache__/
+frontend/routes/__pycache__/
+backend/routes/__pycache__/doctor_routes.cpython-311.pyc
+backend/routes/__pycache__/specialty_routes.cpython-311.pyc
