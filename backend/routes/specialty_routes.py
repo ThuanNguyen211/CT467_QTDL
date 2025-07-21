@@ -77,3 +77,26 @@ def delete_specialty(ma_chuyen_khoa):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@specialty_bp.route('/specialty/patients', methods=['GET'])
+def get_specialty_patient_count():
+    try:
+        ma_chuyen_khoa = request.args.get('ma_chuyen_khoa')
+        
+        if not ma_chuyen_khoa:
+            return jsonify({'error': 'Thiếu tham số ma_chuyen_khoa'}), 400
+            
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('ThongKeBenhNhanChuyenKhoa', (ma_chuyen_khoa,))
+        
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+            
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi thống kê bệnh nhân theo chuyên khoa:", e)
+        return jsonify({'error': str(e)}), 500

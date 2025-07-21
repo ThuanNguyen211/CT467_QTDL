@@ -95,3 +95,28 @@ def delete_doctor(ma_bac_si):
     except Exception as e:
         print("Lỗi xóa bác sĩ:", e)
         return jsonify({'error': str(e)}), 500
+    
+
+@doctor_bp.route('/doctors/patients', methods=['GET'])
+def get_doctor_patient_count():
+    try:
+        ma_bac_si = request.args.get('ma_bac_si')
+        thang = request.args.get('thang', type=int)
+        nam = request.args.get('nam', type=int)
+        
+        if not ma_bac_si or thang is None or nam is None:
+            return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
+            
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
+        
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+            
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi thống kê bệnh nhân của bác sĩ:", e)
+        return jsonify({'error': str(e)}), 500
