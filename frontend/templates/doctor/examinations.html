@@ -21,4 +21,29 @@
   </tbody>
 </table>
 
+<script>
+  document.addEventListener('DOMContentLoaded', async function () {
+      const ma_bac_si = localStorage.getItem('ma_bac_si');
+      if (!ma_bac_si) {
+        alert('Không tìm thấy mã bác sĩ!');
+        return;
+      }
+      const response = await fetch(`http://127.0.0.1:5000/doctors/patients?ma_bac_si=${ma_bac_si}`);
+      const data = await response.json();
+
+      const tbody = document.querySelector('table tbody');
+      tbody.innerHTML = '';
+      data.forEach(exam => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+      <td>${exam.ma_phieu_kham}</td>
+      <td>${exam.ten_benh_nhan}</td>
+      <td>${exam.ngay_kham}</td>
+      <td>${exam.trieu_chung}</td>
+      <td>${exam.chan_doan}</td>
+    `;
+        tbody.appendChild(tr);
+      });
+    });
+</script>
 {% endblock %} 
