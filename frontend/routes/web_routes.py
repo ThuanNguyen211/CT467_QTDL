@@ -85,6 +85,7 @@ def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
 
+
 @web_bp.route('/doctor/statistics/patients')
 def doctor_statistics_patients():
     ma_bac_si = request.args.get('ma_bac_si')
@@ -101,6 +102,10 @@ def doctor_statistics_patients():
 
     return render_template('doctor/statistics_patients.html', patients=patients)
 
+
+@web_bp.route('/doctor/statistics/medicine')
+def doctor_medication_usage():
+    return render_template('doctor/statistics_medicine.html')
 
 # ----------- BỆNH NHÂN -------------
 
