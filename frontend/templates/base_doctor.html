@@ -31,4 +31,14 @@
   </div>
 </body>
 
-</html>
+<script>
+  document.getElementById('logout-link').addEventListener('click', function (event) {
+    // Xóa tất cả localStorage
+    localStorage.clear();
+
+    // Cho phép chuyển hướng (mặc định)
+    // Nếu bạn cần xử lý thêm thì dùng event.preventDefault();
+  });
+</script>
+
+</html> 
