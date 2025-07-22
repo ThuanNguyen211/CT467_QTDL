@@ -1,0 +1,36 @@
+{% extends "base_doctor.html" %}
+
+{% block title %}Thống kê bệnh nhân{% endblock %}
+
+{% block content %}
+<h2>Thống kê bệnh nhân</h2>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const maBacSi = localStorage.getItem('ma_bac_si');
+        console.log("ma_bac_si trong localStorage:", ma_bac_si);
+        if (!maBacSi) {
+            alert('Không tìm thấy mã bác sĩ trong localStorage');
+            return;
+        }
+
+        fetch(`/doctor/statistics/patients?ma_bac_si=${maBacSi}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi khi gọi API');
+                }
+                return response.text(); // nếu trả về HTML
+            })
+            .then(data => {
+                document.getElementById('patient-statistics').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+            });
+    });
+</script>
+
+<!-- Nơi hiển thị kết quả -->
+<div id="patient-statistics"></div>
+{% endblock %}
