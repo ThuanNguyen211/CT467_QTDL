@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from db import get_connection
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 booking_bp = Blueprint('booking', __name__)
 
@@ -140,3 +140,49 @@ def get_my_booking():
     except Exception as e:
         print("Lỗi lấy lich hen:", e)
         return jsonify({'error': str(e)}), 500
+
+
+
+#Lay lich hen theo bac si
+@booking_bp.route('/doctor/get/appointments', methods=['GET'])
+def get_bookings_by_doctor_id():
+    ma_bs = request.args.get('ma_bac_si')
+    ngay = request.args.get('date')
+    status = request.args.get('status')  # Có thể là None
+
+    if not ma_bs:
+        return jsonify({'error': 'Thiếu ma_bac_si'}), 400
+
+    # Nếu không có ngày thì mặc định là hôm nay
+    if not ngay:
+        ngay = date.today().strftime('%Y-%m-%d')
+
+    try:
+        ngay_date = datetime.strptime(ngay, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Định dạng ngày không hợp lệ'}), 400
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Gọi stored procedure
+    cursor.callproc('LichHenBacSiTheoNgay', [ma_bs, ngay_date])
+    # Lấy kết quả
+    rows = []
+    for result in cursor.stored_results():
+        rows = result.fetchall()
+
+    conn.close()
+
+    # Lọc theo trạng thái nếu có
+    if status:
+        rows = [row for row in rows if row['trang_thai'] == status]
+
+    # Chuyển datetime về string nếu cần
+    for row in rows:
+        for k, v in row.items():
+            if isinstance(v, (datetime, timedelta)):
+                row[k] = str(v)
+    print(rows)
+    return jsonify(rows)
+
