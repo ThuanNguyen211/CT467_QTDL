@@ -39,3 +39,36 @@ BEGIN
     WHERE bs.ma_chuyen_khoa = ma_chuyen_khoa;
 END $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS ThongKeThuocSuDung $$
+CREATE PROCEDURE ThongKeThuocSuDung(
+    IN filter_type VARCHAR(10), -- 'day', 'month', 'year', 'range'
+    IN filter_day DATE,
+    IN filter_month INT,
+    IN filter_year INT,
+    IN start_date DATE,
+    IN end_date DATE
+)
+BEGIN
+    SELECT 
+        t.ma_thuoc,
+        t.ten_thuoc,
+        t.don_vi,
+        t.gia,
+        SUM(dt.so_luong) AS so_luong,
+        SUM(dt.so_luong * t.gia) AS tong_tien
+    FROM thuoc t
+    JOIN don_thuoc dt ON t.ma_thuoc = dt.ma_thuoc
+    JOIN phieu_kham pk ON dt.ma_phieu_kham = pk.ma_phieu_kham
+    WHERE 
+        CASE 
+            WHEN filter_type = 'day' THEN pk.ngay_kham = filter_day
+            WHEN filter_type = 'month' THEN MONTH(pk.ngay_kham) = filter_month AND YEAR(pk.ngay_kham) = filter_year
+            WHEN filter_type = 'year' THEN YEAR(pk.ngay_kham) = filter_year
+            WHEN filter_type = 'range' THEN pk.ngay_kham BETWEEN start_date AND end_date
+        END
+    GROUP BY t.ma_thuoc, t.ten_thuoc, t.don_vi, t.gia
+    ORDER BY so_luong DESC;
+END $$
+DELIMITER ;

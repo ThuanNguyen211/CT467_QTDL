@@ -1,0 +1,402 @@
+{% extends 'base_doctor.html' %}
+{% block title %}Thống kê Số lượng Thuốc Sử dụng{% endblock %}
+{% block content %}
+<h2>Thống kê Số lượng Thuốc Sử dụng</h2>
+<hr />
+
+<div class="row mb-3">
+    <div class="col-md-2">
+        <strong>Loại thống kê</strong>
+        <select id="filterType" class="form-control">
+            <option value="day">Theo ngày</option>
+            <option value="month">Theo tháng</option>
+            <option value="year">Theo năm</option>
+            <option value="range">Theo khoảng thời gian</option>
+        </select>
+    </div>
+    <div class="col-md-2" id="dayFilter">
+        <strong>Ngày</strong>
+        <input type="date" id="filterDay" class="form-control">
+    </div>
+    <div class="col-md-2" id="monthFilter" style="display: none;">
+        <strong>Tháng</strong>
+        <select id="filterMonth" class="form-control">
+            {% for i in range(1, 13) %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2" id="yearFilter">
+        <strong>Năm</strong>
+        <select id="filterYear" class="form-control">
+            {% for i in range(2020, 2026) %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2" id="rangeFilter" style="display: none;">
+        <strong>Từ ngày</strong>
+        <input type="date" id="startDate" class="form-control">
+    </div>
+    <div class="col-md-2" id="rangeFilterEnd" style="display: none;">
+        <strong>Đến ngày</strong>
+        <input type="date" id="endDate" class="form-control">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button id="clearFilters" class="btn btn-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                <path
+                    d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+            </svg>
+        </button>
+    </div>
+    <div class="col-md-4 d-flex align-items-end justify-content-end">
+        <button id="exportReport" class="btn btn-success">Xuất báo cáo (PDF)</button>
+    </div>
+</div>
+
+<div class="row mb-3 justify-content-center">
+    <div class="col-md-6 text-center">
+        <canvas id="pieChart"></canvas>
+        <button id="downloadChart" class="btn btn-primary mt-2">Tải biểu đồ (PNG)</button>
+    </div>  
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th onclick="sortTable('stt')" style="width: 6%; text-align: center;">STT ↕</th>
+            <th onclick="sortTable('ten_thuoc')" style="width: 40%; text-align: center;">Tên thuốc ↕</th>
+            <th onclick="sortTable('don_vi')" style="width: 15%; text-align: center;">Đơn vị ↕</th>
+            <th onclick="sortTable('so_luong')" style="width: 15%; text-align: center;">Số lượng ↕</th>
+            <th onclick="sortTable('tong_tien')" style="width: 24%; text-align: center;">Số tiền (VNĐ) ↕</th>
+        </tr>
+    </thead>
+    <tbody id="medicationTbody"></tbody>
+</table>
+
+<div class="d-flex justify-content-center align-items-center mb-3">
+    <div>
+        <button id="exportXls" class="btn btn-primary">Xuất bảng (XLS)</button>
+        <button id="exportPdf" class="btn btn-primary">Xuất bảng (PDF)</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    let medicationData = [];
+    let sortedData = [];
+    let pieChart = null;
+    let sortField = 'so_luong';
+    let sortAsc = false;
+
+    function formatDateToDisplay(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function formatDateToInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('medicationTbody');
+        tbody.innerHTML = '';
+        data.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+        <td class="text-center">${index + 1}</td>
+        <td>${item.ten_thuoc}</td>
+        <td class="text-center">${item.don_vi}</td>
+        <td class="text-center">${item.so_luong}</td>
+        <td>${item.tong_tien.toLocaleString('vi-VN')}</td>
+      `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPieChart(data) {
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        let chartData = data.length > 0 ? data.slice(0, 10) : [{ ten_thuoc: 'Thuốc', so_luong: 1 }];
+        const total = chartData.reduce((sum, item) => sum + item.so_luong, 0);
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: chartData.map(item => item.ten_thuoc),
+                datasets: [{
+                    data: chartData.map(item => item.so_luong),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF5733', '#C70039', '#900C3F', '#581845'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { display: true, text: data.length > 0 ? 'Tỉ lệ thuốc sử dụng (Top 10)' : 'Không có dữ liệu', font: { size: 20 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const value = context.raw;
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
+                                return `${context.label}: ${percentage}%`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        formatter: (value) => {
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
+                            return `${percentage}%`;
+                        },
+                        color: '#fff',
+                        font: { weight: 'bold' }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    function sortTable(field) {
+        if (sortField === field) {
+            sortAsc = !sortAsc;
+        } else {
+            sortField = field;
+            sortAsc = true;
+        }
+        sortedData = [...medicationData].sort((a, b) => {
+            let valA = a[field];
+            let valB = b[field];
+            if (field === 'stt') {
+                valA = medicationData.indexOf(a) + 1;
+                valB = medicationData.indexOf(b) + 1;
+            } else if (field === 'tong_tien' || field === 'so_luong') {
+                valA = Number(valA);
+                valB = Number(valB);
+            }
+            if (valA < valB) return sortAsc ? -1 : 1;
+            if (valA > valB) return sortAsc ? 1 : -1;
+            return 0;
+        });
+        renderTable(sortedData);
+        renderPieChart(sortedData);
+    }
+
+    async function fetchMedicationData() {
+        const filterType = document.getElementById('filterType').value;
+        const filterDay = document.getElementById('filterDay').value;
+        const filterMonth = document.getElementById('filterMonth').value;
+        const filterYear = document.getElementById('filterYear').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let url = `http://127.0.0.1:5000/stats/medication/usage?filter_type=${filterType}`;
+        if (filterType === 'day') url += `&filter_day=${filterDay}`;
+        if (filterType === 'month') url += `&filter_month=${filterMonth}&filter_year=${filterYear}`;
+        if (filterType === 'year') url += `&filter_year=${filterYear}`;
+        if (filterType === 'range') url += `&start_date=${startDate}&end_date=${endDate}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            medicationData = await response.json();
+            sortedData = [...medicationData];
+            renderTable(sortedData);
+            renderPieChart(sortedData);
+        } catch (error) {
+            console.error('Lỗi lấy dữ liệu:', error);
+            alert('Không thể lấy dữ liệu thống kê thuốc: ' + error.message);
+            medicationData = [];
+            sortedData = [];
+            renderTable(sortedData);
+            renderPieChart(sortedData);
+        }
+    }
+
+    function exportXls() {
+        try {
+            if (!sortedData.length) {
+                alert('Không có dữ liệu để xuất XLS!');
+                return;
+            }
+            const ws = XLSX.utils.json_to_sheet(
+                sortedData.map((item, index) => ({
+                    STT: index + 1,
+                    'Tên thuốc': item.ten_thuoc,
+                    'Đơn vị': item.don_vi,
+                    'Số lượng': item.so_luong,
+                    'Số tiền (VNĐ)': item.tong_tien
+                })),
+                { header: ['STT', 'Tên thuốc', 'Đơn vị', 'Số lượng', 'Số tiền (VNĐ)'] }
+            );
+            ws['!cols'] = [{ wch: 5 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 15 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Thống kê thuốc');
+            XLSX.write(wb, 'ThongKeThuoc.xlsx');
+        } catch (error) {
+            console.error('Lỗi xuất XLS:', error);
+            alert('Không thể xuất file XLS: ' + error.message);
+        }
+    }
+
+    async function exportTableToPdf() {
+        try {
+            if (!sortedData.length) {
+                alert('Không có dữ liệu để xuất PDF!');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Bảng Thống kê Thuốc Sử dụng', 10, 10);
+            doc.autoTable({
+                head: [['STT', 'Tên thuốc', 'Đơn vị', 'Số lượng', 'Số tiền (VNĐ)']],
+                body: sortedData.map((item, index) => [
+                    index + 1,
+                    item.ten_thuoc,
+                    item.don_vi,
+                    item.so_luong,
+                    item.tong_tien.toLocaleString('vi-VN')
+                ]),
+                startY: 20
+            });
+            doc.save('ThongKeThuoc.pdf');
+        } catch (error) {
+            console.error('Lỗi xuất PDF:', error);
+            alert('Không thể xuất file PDF: ' + error.message);
+        }
+    }
+
+    async function downloadChart() {
+        try {
+            const canvas = document.getElementById('pieChart');
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'BieuDoThuoc.png';
+            link.click();
+        } catch (error) {
+            console.error('Lỗi tải biểu đồ:', error);
+            alert('Không thể tải biểu đồ: ' + error.message);
+        }
+    }
+
+    async function exportReport() {
+        try {
+            if (!sortedData.length) {
+                alert('Không có dữ liệu để xuất báo cáo PDF!');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const filterType = document.getElementById('filterType').value;
+            let title = 'BÁO CÁO LƯỢT SỬ DỤNG THUỐC';
+            let timeFilter = '';
+            if (filterType === 'day') {
+                timeFilter = `Ngày: ${formatDateToDisplay(document.getElementById('filterDay').value)}`;
+            } else if (filterType === 'month') {
+                timeFilter = `Tháng: ${document.getElementById('filterMonth').value}/${document.getElementById('filterYear').value}`;
+            } else if (filterType === 'year') {
+                timeFilter = `Năm: ${document.getElementById('filterYear').value}`;
+            } else {
+                timeFilter = `Từ: ${formatDateToDisplay(document.getElementById('startDate').value)} đến ${formatDateToDisplay(document.getElementById('endDate').value)}`;
+            }
+            const exportTime = new Date().toLocaleString('vi-VN');
+
+            doc.setFontSize(16);
+            doc.text(title, 10, 10);
+            doc.setFontSize(12);
+            doc.text(timeFilter, 10, 20);
+            doc.text(`Thời gian xuất báo cáo: ${exportTime}`, 10, 30);
+
+            const canvas = document.getElementById('pieChart');
+            const imgData = canvas.toDataURL('image/png');
+            doc.addImage(imgData, 'PNG', 10, 40, 100, 100);
+
+            doc.autoTable({
+                head: [['STT', 'Tên thuốc', 'Đơn vị', 'Số lượng', 'Số tiền (VNĐ)']],
+                body: sortedData.map((item, index) => [
+                    index + 1,
+                    item.ten_thuoc,
+                    item.don_vi,
+                    item.so_luong,
+                    item.tong_tien.toLocaleString('vi-VN')
+                ]),
+                startY: 150
+            });
+
+            doc.save('BaoCaoThuoc.pdf');
+        } catch (error) {
+            console.error('Lỗi xuất báo cáo:', error);
+            alert('Không thể xuất báo cáo PDF: ' + error.message);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = formatDateToInput(new Date('2025-07-22')); // Ngày hiện tại
+        document.getElementById('filterType').value = 'day';
+        document.getElementById('filterDay').value = today;
+        document.getElementById('filterMonth').value = '7';
+        document.getElementById('filterYear').value = '2025';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('dayFilter').style.display = 'block';
+        document.getElementById('monthFilter').style.display = 'none';
+        document.getElementById('yearFilter').style.display = 'none';
+        document.getElementById('rangeFilter').style.display = 'none';
+        document.getElementById('rangeFilterEnd').style.display = 'none';
+
+        document.getElementById('filterType').addEventListener('change', function () {
+            const filterType = this.value;
+            document.getElementById('dayFilter').style.display = filterType === 'day' ? 'block' : 'none';
+            document.getElementById('monthFilter').style.display = filterType === 'month' ? 'block' : 'none';
+            document.getElementById('yearFilter').style.display = ['month', 'year'].includes(filterType) ? 'block' : 'none';
+            document.getElementById('rangeFilter').style.display = filterType === 'range' ? 'block' : 'none';
+            document.getElementById('rangeFilterEnd').style.display = filterType === 'range' ? 'block' : 'none';
+            fetchMedicationData();
+        });
+
+        document.getElementById('filterDay').addEventListener('change', fetchMedicationData);
+        document.getElementById('filterMonth').addEventListener('change', fetchMedicationData);
+        document.getElementById('filterYear').addEventListener('change', fetchMedicationData);
+        document.getElementById('startDate').addEventListener('change', fetchMedicationData);
+        document.getElementById('endDate').addEventListener('change', fetchMedicationData);
+
+        document.getElementById('clearFilters').addEventListener('click', function () {
+            document.getElementById('filterType').value = 'day';
+            document.getElementById('filterDay').value = today;
+            document.getElementById('filterMonth').value = '7';
+            document.getElementById('filterYear').value = '2025';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('dayFilter').style.display = 'block';
+            document.getElementById('monthFilter').style.display = 'none';
+            document.getElementById('yearFilter').style.display = 'none';
+            document.getElementById('rangeFilter').style.display = 'none';
+            document.getElementById('rangeFilterEnd').style.display = 'none';
+            fetchMedicationData();
+        });
+
+        document.getElementById('exportXls').addEventListener('click', exportXls);
+        document.getElementById('exportPdf').addEventListener('click', exportTableToPdf);
+        document.getElementById('downloadChart').addEventListener('click', downloadChart);
+        document.getElementById('exportReport').addEventListener('click', exportReport);
+
+        fetchMedicationData();
+    });
+</script>
+{% endblock %}

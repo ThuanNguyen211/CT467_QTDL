@@ -84,6 +84,10 @@ def doctor_examinations_history():
 def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
+@web_bp.route('/doctor/statistics/medicine')
+def doctor_medication_usage():
+    return render_template('doctor/statistics_medicine.html')
+
 # ----------- BỆNH NHÂN -------------
 @web_bp.route('/patient/appointments')
 def patient_appointments():
