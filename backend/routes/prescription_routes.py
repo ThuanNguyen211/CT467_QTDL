@@ -81,3 +81,24 @@ def delete_prescription(ma_don_thuoc):
     except Exception as e:
         print("Lỗi xóa đơn thuốc:", e)
         return jsonify({'error': str(e)}), 500
+
+
+
+
+@prescription_bp.route('/prescriptions/<int:ma_phieu_kham>')
+def get_prescriptions_by_exam(ma_phieu_kham):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT dt.lieu_dung, dt.cach_dung, t.ten_thuoc
+            FROM don_thuoc dt
+            JOIN thuoc t ON dt.ma_thuoc = t.ma_thuoc
+            WHERE dt.ma_phieu_kham = %s
+        """, (ma_phieu_kham,))
+        result = cursor.fetchall()
+        conn.close()
+        return jsonify(result), 200
+    except Exception as e:
+        print("Lỗi lấy đơn thuốc:", e)
+        return jsonify({'error': str(e)}), 500

@@ -48,11 +48,22 @@ def doctor_departments():
 
 @web_bp.route('/doctor/appointments')
 def doctor_appointments():
-    return render_template('doctor/appointments.html', appointments=[], date='', status='')
+
+    return render_template(
+        'doctor/appointments.html',
+
+    )
 
 @web_bp.route('/doctor/examinations/new', methods=['GET', 'POST'])
 def doctor_examination_new():
     return render_template('doctor/examination_form.html', examination=None)
+
+
+# In phiếu khám
+@web_bp.route('/doctor/examinations/<int:ma_phieu_kham>/print')
+def print_exam(ma_phieu_kham):
+    return render_template('doctor/print_exam.html', ma_phieu_kham=ma_phieu_kham)
+
 
 @web_bp.route('/doctor/prescriptions/new', methods=['GET', 'POST'])
 def doctor_prescription_new():

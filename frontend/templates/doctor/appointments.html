@@ -1,10 +1,9 @@
-{% extends 'base_doctor.html' %}
-{% block title %}Lịch hẹn của tôi{% endblock %}
+{% extends 'base_doctor.html' %} {% block title %}Lịch hẹn của tôi{% endblock %}
 {% block content %}
 <h2>Lịch hẹn của tôi</h2>
-<form class="row g-2 mb-3">
+<form class="row g-2 mb-3" id="filterForm">
   <div class="col-md-4">
-    <input type="date" class="form-control" name="date" value="{{ date }}">
+    <input type="date" class="form-control" name="date" value="{{ date }}" />
   </div>
   <div class="col-md-4">
     <select class="form-select" name="status">
@@ -17,27 +16,109 @@
   <div class="col-md-4">
     <button class="btn btn-primary w-100" type="submit">Lọc</button>
   </div>
+  {# Hiden input cho ma bac si#}
+  <input type="hidden" name="ma_bac_si" id="ma_bac_si_input" />
 </form>
 <table class="table table-bordered">
   <thead>
     <tr>
-      <th>BN</th><th>Ngày</th><th>Giờ</th><th>Trạng thái</th><th>Hành động</th>
+      <th>BN</th>
+      <th>Ngày</th>
+      <th>Giờ</th>
+      <th>Trạng thái</th>
+      <th>Hành động</th>
     </tr>
   </thead>
   <tbody>
     {% for appt in appointments %}
     <tr>
-      <td>{{ appt.ten_benh_nhan }}</td>
+      <td>{{ appt.ma_benh_nhan }}</td>
       <td>{{ appt.ngay_hen }}</td>
       <td>{{ appt.gio_hen }}</td>
       <td>{{ appt.trang_thai }}</td>
       <td>
         {% if appt.trang_thai == 'Chờ khám' %}
-        <a href="/doctor/examinations/new?appointment_id={{ appt.ma_lich_hen }}" class="btn btn-sm btn-success">Tạo phiếu khám</a>
+        <a
+          href="/doctor/examinations/new?appointment_id={{ appt.ma_lich_hen }}"
+          class="btn btn-sm btn-success"
+          >Tạo phiếu khám</a
+        >
         {% endif %}
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-{% endblock %} 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("filterForm");
+    const inputMaBacSi = document.getElementById("ma_bac_si_input");
+    const tbody = document.querySelector("table tbody");
+
+    // Gán từ localStorage vào hidden input
+    const maBacSi = localStorage.getItem("ma_bac_si");
+    if (maBacSi) {
+      inputMaBacSi.value = maBacSi;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const date = form.elements["date"].value;
+      const status = form.elements["status"].value;
+      const ma_bac_si = inputMaBacSi.value;
+
+      const params = new URLSearchParams();
+      if (date) params.append("date", date);
+      if (status) params.append("status", status);
+      if (ma_bac_si) params.append("ma_bac_si", ma_bac_si);
+
+      fetch(
+        `http://127.0.0.1:5000/doctor/get/appointments?${params.toString()}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          // Xóa nội dung cũ
+          tbody.innerHTML = "";
+
+          if (data.error) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.error}</td></tr>`;
+            return;
+          }
+
+          if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">Không có lịch hẹn nào</td></tr>`;
+            return;
+          }
+
+          data.forEach((appt) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${appt.ma_benh_nhan}</td>
+              <td>${appt.ngay_hen}</td>
+              <td>${appt.gio_hen}</td>
+              <td>${appt.trang_thai}</td>
+              <td>
+                ${
+                  appt.trang_thai === "Đã đặt"
+                    ? `<a href="/doctor/examinations/new?appointment_id=${appt.ma_lich_hen}" class="btn btn-sm btn-success">Tạo phiếu khám</a>`
+                    : ""
+                }
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch((err) => {
+          console.error("Lỗi:", err);
+          tbody.innerHTML =
+            "<tr><td colspan='5' class='text-danger'>Không thể tải dữ liệu</td></tr>";
+        });
+    });
+
+    // Kích hoạt gọi ban đầu (nếu cần)
+    form.dispatchEvent(new Event("submit"));
+  });
+</script>
+
+{% endblock %}
