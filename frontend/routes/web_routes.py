@@ -85,6 +85,10 @@ def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
 # ----------- BỆNH NHÂN -------------
+@web_bp.route('/patient/profile')
+def patient_profile():
+    return render_template('patient/profile.html')
+
 @web_bp.route('/patient/appointments')
 def patient_appointments():
     return render_template('patient/appointments.html', appointments=[])
@@ -92,10 +96,6 @@ def patient_appointments():
 @web_bp.route('/patient/appointments/new', methods=['GET', 'POST'])
 def patient_appointment_new():
     return render_template('patient/appointment_form.html', doctors=[], available_times=[])
-
-@web_bp.route('/patient/appointments/<ma_lich_hen>/cancel', methods=['POST'])
-def patient_appointment_cancel(ma_lich_hen):
-    return redirect(url_for('web.patient_appointments'))
 
 @web_bp.route('/patient/examinations/history')
 def patient_examinations_history():
