@@ -101,15 +101,18 @@ def delete_doctor(ma_bac_si):
 def get_doctor_patient_count():
     try:
         ma_bac_si = request.args.get('ma_bac_si')
-        thang = request.args.get('thang', type=int)
-        nam = request.args.get('nam', type=int)
+        # thang = request.args.get('thang', type=int)
+        # nam = request.args.get('nam', type=int)
         
-        if not ma_bac_si or thang is None or nam is None:
-            return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
+        if not ma_bac_si:
+            return jsonify({'error': 'Thiếu tham số ma_bac_si'}), 400
+        # if not ma_bac_si or thang is None or nam is None:
+        #     return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
             
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
+        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, ))
+        # cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
         
         data = []
         for result in cursor.stored_results():
