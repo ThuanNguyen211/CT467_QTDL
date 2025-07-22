@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request
-from flask import session
+from flask import Blueprint, render_template, redirect, url_for
 import requests
 
 web_bp = Blueprint('web', __name__)
@@ -17,8 +16,7 @@ def login():
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
 def doctor_profile():
-    return render_template('doctor/profile.html')
-
+    return render_template('doctor/profile.html', doctor={})
 
 @web_bp.route('/doctor/medicines')
 def doctor_medicines():
@@ -50,20 +48,22 @@ def doctor_departments():
 
 @web_bp.route('/doctor/appointments')
 def doctor_appointments():
-    ma_bac_si = session.get('ma_bac_si')
-    appointments = []
-    if ma_bac_si:
-        try:
-            response = requests.get(f'http://localhost:5000/appointments?ma_bac_si={ma_bac_si}')
-            response.raise_for_status()
-            appointments = response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Lỗi khi gọi API: {e}")
-    return render_template('doctor/appointments.html', appointments=appointments)
+
+    return render_template(
+        'doctor/appointments.html',
+
+    )
 
 @web_bp.route('/doctor/examinations/new', methods=['GET', 'POST'])
 def doctor_examination_new():
     return render_template('doctor/examination_form.html', examination=None)
+
+
+# In phiếu khám
+@web_bp.route('/doctor/examinations/<int:ma_phieu_kham>/print')
+def print_exam(ma_phieu_kham):
+    return render_template('doctor/print_exam.html', ma_phieu_kham=ma_phieu_kham)
+
 
 @web_bp.route('/doctor/prescriptions/new', methods=['GET', 'POST'])
 def doctor_prescription_new():
@@ -85,10 +85,6 @@ def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
 # ----------- BỆNH NHÂN -------------
-@web_bp.route('/patient/profile')
-def patient_profile():
-    return render_template('patient/profile.html')
-
 @web_bp.route('/patient/appointments')
 def patient_appointments():
     return render_template('patient/appointments.html', appointments=[])
@@ -96,6 +92,10 @@ def patient_appointments():
 @web_bp.route('/patient/appointments/new', methods=['GET', 'POST'])
 def patient_appointment_new():
     return render_template('patient/appointment_form.html', doctors=[], available_times=[])
+
+@web_bp.route('/patient/appointments/<ma_lich_hen>/cancel', methods=['POST'])
+def patient_appointment_cancel(ma_lich_hen):
+    return redirect(url_for('web.patient_appointments'))
 
 @web_bp.route('/patient/examinations/history')
 def patient_examinations_history():

@@ -1,24 +1,181 @@
-{% extends 'base_doctor.html' %}
-{% block title %}Tạo Phiếu Khám{% endblock %}
+{% extends 'base_doctor.html' %} {% block title %}Tạo Phiếu Khám{% endblock %}
 {% block content %}
 <h2>Tạo Phiếu Khám</h2>
-<form method="post">
-  <div class="mb-3">
-    <label class="form-label">Mã phiếu khám</label>
-    <input type="text" class="form-control" name="ma_phieu_kham" value="{{ examination.ma_phieu_kham if examination else '' }}" required>
-  </div>
+<form method="post" id="medicalExamForm">
   <div class="mb-3">
     <label class="form-label">Triệu chứng</label>
-    <textarea class="form-control" name="trieu_chung">{{ examination.trieu_chung if examination else '' }}</textarea>
+    <textarea class="form-control" name="trieu_chung" id="trieu_chung">
+{{ examination.trieu_chung if examination else '' }}</textarea
+    >
   </div>
   <div class="mb-3">
     <label class="form-label">Chẩn đoán</label>
-    <textarea class="form-control" name="chan_doan">{{ examination.chan_doan if examination else '' }}</textarea>
+    <textarea class="form-control" name="chan_doan" id="chan_doan">
+{{ examination.chan_doan if examination else '' }}</textarea
+    >
   </div>
   <div class="mb-3">
     <label class="form-label">Ngày khám</label>
-    <input type="date" class="form-control" name="ngay_kham" value="{{ examination.ngay_kham if examination else '' }}">
+    <input
+      type="date"
+      class="form-control"
+      name="ngay_kham"
+      id="ngay_kham"
+      value="{{ examination.ngay_kham if examination else '' }}"
+    />
   </div>
-  <button type="submit" class="btn btn-primary">Lưu phiếu khám</button>
+  <hr />
+  <h4>Đơn thuốc</h4>
+  <table class="table" id="medicineTable">
+    <thead>
+      <tr>
+        <th>Thuốc</th>
+        <th>Liều dùng</th>
+        <th>Cách dùng</th>
+        <th>
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            id="addMedicineBtn"
+          >
+            +
+          </button>
+        </th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div>
+    <button type="submit" class="btn btn-primary">Lưu phiếu khám</button>
+  </div>
 </form>
-{% endblock %} 
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    const medicineTableBody = document.querySelector("#medicineTable tbody");
+    const addBtn = document.getElementById("addMedicineBtn");
+    let medicines = [];
+
+    async function loadMedicines() {
+      try {
+        const res = await fetch("http://localhost:5000/medicines");
+        medicines = await res.json();
+      } catch (err) {
+        console.error("Lỗi tải thuốc:", err);
+        alert("Không thể tải danh sách thuốc");
+      }
+    }
+
+    function createMedicineRow() {
+      const tr = document.createElement("tr");
+
+      // Thuốc
+      const tdThuoc = document.createElement("td");
+      const select = document.createElement("select");
+      select.classList.add("form-select");
+      select.name = "ma_thuoc";
+
+      medicines.forEach((med) => {
+        const option = document.createElement("option");
+        option.value = med.ma_thuoc;
+        option.textContent = `${med.ten_thuoc} (${med.don_vi})`;
+        select.appendChild(option);
+      });
+      tdThuoc.appendChild(select);
+
+      // Liều dùng
+      const tdLieu = document.createElement("td");
+      const inputLieu = document.createElement("input");
+      inputLieu.type = "text";
+      inputLieu.classList.add("form-control");
+      inputLieu.placeholder = "";
+      inputLieu.name = "lieu_dung";
+      tdLieu.appendChild(inputLieu);
+
+      // Cách dùng
+      const tdCach = document.createElement("td");
+      const inputCach = document.createElement("input");
+      inputCach.type = "text";
+      inputCach.classList.add("form-control");
+      inputCach.placeholder = "";
+      inputCach.name = "cach_dung";
+      tdCach.appendChild(inputCach);
+
+      // Nút xóa
+      const tdXoa = document.createElement("td");
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.classList.add("btn", "btn-danger", "btn-sm");
+      delBtn.innerText = "❌";
+      delBtn.onclick = () => tr.remove();
+      tdXoa.appendChild(delBtn);
+
+      tr.appendChild(tdThuoc);
+      tr.appendChild(tdLieu);
+      tr.appendChild(tdCach);
+      tr.appendChild(tdXoa);
+      medicineTableBody.appendChild(tr);
+    }
+
+    addBtn.addEventListener("click", createMedicineRow);
+
+    await loadMedicines();
+
+    // Set ngày mặc định nếu chưa có
+    const ngayKhamInput = document.getElementById("ngay_kham");
+    if (ngayKhamInput && !ngayKhamInput.value) {
+      ngayKhamInput.value = new Date().toISOString().split("T")[0];
+    }
+
+    // Xử lý submit
+    const form = document.getElementById("medicalExamForm");
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const appointmentId = new URLSearchParams(window.location.search).get(
+        "appointment_id"
+      );
+      if (!appointmentId) return alert("Không tìm thấy mã lịch hẹn!");
+
+      const data = {
+        ma_lich_hen: appointmentId,
+        trieu_chung: document.getElementById("trieu_chung").value,
+        chan_doan: document.getElementById("chan_doan").value,
+        ngay_kham: document.getElementById("ngay_kham").value,
+        don_thuoc: [],
+      };
+
+      document.querySelectorAll("#medicineTable tbody tr").forEach((row) => {
+        const ma_thuoc = row.querySelector("select").value;
+        const lieu_dung = row.querySelector("input[name='lieu_dung']").value;
+        const cach_dung = row.querySelector("input[name='cach_dung']").value;
+
+        if (ma_thuoc && lieu_dung && cach_dung) {
+          data.don_thuoc.push({ ma_thuoc, lieu_dung, cach_dung });
+        }
+      });
+
+      try {
+        const response = await fetch("http://localhost:5000/medical_exams", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert(result.message);
+          window.location.href = "/doctor/appointments";
+        } else {
+          alert("❌ " + (result.error || "Lỗi khi tạo phiếu khám"));
+        }
+      } catch (error) {
+        console.error(error);
+        alert("❌ Lỗi kết nối!");
+      }
+    });
+  });
+</script>
+
+{% endblock %}
