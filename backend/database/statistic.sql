@@ -2,17 +2,31 @@ USE phong_kham;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ThongKeBenhNhanBacSi $$
-CREATE PROCEDURE ThongKeBenhNhanBacSi(IN ma_bac_si INT, IN thang INT, IN nam INT)
+CREATE PROCEDURE ThongKeBenhNhanBacSi(IN ma_bac_si VARCHAR(10))
 BEGIN
-    SELECT COUNT(DISTINCT lh.ma_benh_nhan) AS so_benh_nhan
+    SELECT DISTINCT pk.ma_phieu_kham, bn.ten_benh_nhan, pk.ngay_kham, pk.trieu_chung, pk.chan_doan, bn.tien_su_benh
     FROM bac_si bs
     JOIN lich_hen lh ON lh.ma_bac_si = bs.ma_bac_si
     JOIN phieu_kham pk ON pk.ma_lich_hen = lh.ma_lich_hen
-    WHERE bs.ma_bac_si = ma_bac_si
-      AND MONTH(pk.ngay_kham) = thang
-      AND YEAR(pk.ngay_kham) = nam;
+    JOIN benh_nhan bn ON lh.ma_benh_nhan = bn.ma_benh_nhan
+    WHERE bs.ma_bac_si = ma_bac_si;
 END $$
 DELIMITER ;
+
+-- DELIMITER $$
+-- DROP PROCEDURE IF EXISTS ThongKeBenhNhanBacSi $$
+-- CREATE PROCEDURE ThongKeBenhNhanBacSi(IN ma_bac_si VARCHAR(10), IN thang INT, IN nam INT)
+-- BEGIN
+--     SELECT DISTINCT pk.ma_phieu_kham, bn.ten_benh_nhan, pk.ngay_kham, pk.trieu_chung, pk.chan_doan, bn.tien_su_benh
+--     FROM bac_si bs
+--     JOIN lich_hen lh ON lh.ma_bac_si = bs.ma_bac_si
+--     JOIN phieu_kham pk ON pk.ma_lich_hen = lh.ma_lich_hen
+--     JOIN benh_nhan bn ON lh.ma_benh_nhan = bn.ma_benh_nhan
+--     WHERE bs.ma_bac_si = ma_bac_si
+--       AND MONTH(pk.ngay_kham) = thang
+--       AND YEAR(pk.ngay_kham) = nam;
+-- END $$
+-- DELIMITER ;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ThongKeBenhNhanChuyenKhoa $$
@@ -23,5 +37,38 @@ BEGIN
     JOIN lich_hen lh ON lh.ma_bac_si = bs.ma_bac_si
     JOIN phieu_kham pk ON pk.ma_lich_hen = lh.ma_lich_hen
     WHERE bs.ma_chuyen_khoa = ma_chuyen_khoa;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS ThongKeThuocSuDung $$
+CREATE PROCEDURE ThongKeThuocSuDung(
+    IN filter_type VARCHAR(10), -- 'day', 'month', 'year', 'range'
+    IN filter_day DATE,
+    IN filter_month INT,
+    IN filter_year INT,
+    IN start_date DATE,
+    IN end_date DATE
+)
+BEGIN
+    SELECT 
+        t.ma_thuoc,
+        t.ten_thuoc,
+        t.don_vi,
+        t.gia,
+        SUM(dt.so_luong) AS so_luong,
+        SUM(dt.so_luong * t.gia) AS tong_tien
+    FROM thuoc t
+    JOIN don_thuoc dt ON t.ma_thuoc = dt.ma_thuoc
+    JOIN phieu_kham pk ON dt.ma_phieu_kham = pk.ma_phieu_kham
+    WHERE 
+        CASE 
+            WHEN filter_type = 'day' THEN pk.ngay_kham = filter_day
+            WHEN filter_type = 'month' THEN MONTH(pk.ngay_kham) = filter_month AND YEAR(pk.ngay_kham) = filter_year
+            WHEN filter_type = 'year' THEN YEAR(pk.ngay_kham) = filter_year
+            WHEN filter_type = 'range' THEN pk.ngay_kham BETWEEN start_date AND end_date
+        END
+    GROUP BY t.ma_thuoc, t.ten_thuoc, t.don_vi, t.gia
+    ORDER BY so_luong DESC;
 END $$
 DELIMITER ;

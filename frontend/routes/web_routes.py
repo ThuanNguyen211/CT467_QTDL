@@ -12,11 +12,6 @@ def home():
 def login():
     return render_template('login.html')
 
-@web_bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/login')
-
 
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
@@ -35,14 +30,17 @@ def doctor_medicines():
     return render_template('doctor/medicines.html', medicines=medicines)
 
 
-# Thêm thuốc
+# Thêm thuốc (Tín)
 @web_bp.route('/doctor/medicines/new', methods=['GET', 'POST'])
 def doctor_medicine_new():
     return render_template('doctor/medicine_form.html', medicine=None)
 
+
+
+
 @web_bp.route('/doctor/medicines/<ma_thuoc>/edit', methods=['GET', 'POST'])
 def doctor_medicine_edit(ma_thuoc):
-    return render_template('doctor/medicine_form.html', medicine={})
+    return render_template('doctor/medicine_form.html', medicine_id=ma_thuoc)
 
 @web_bp.route('/doctor/departments')
 def doctor_departments():
@@ -50,11 +48,22 @@ def doctor_departments():
 
 @web_bp.route('/doctor/appointments')
 def doctor_appointments():
-    return render_template('doctor/appointments.html', appointments=[], date='', status='')
+
+    return render_template(
+        'doctor/appointments.html',
+
+    )
 
 @web_bp.route('/doctor/examinations/new', methods=['GET', 'POST'])
 def doctor_examination_new():
     return render_template('doctor/examination_form.html', examination=None)
+
+
+# In phiếu khám
+@web_bp.route('/doctor/examinations/<int:ma_phieu_kham>/print')
+def print_exam(ma_phieu_kham):
+    return render_template('doctor/print_exam.html', ma_phieu_kham=ma_phieu_kham)
+
 
 @web_bp.route('/doctor/prescriptions/new', methods=['GET', 'POST'])
 def doctor_prescription_new():
@@ -63,7 +72,7 @@ def doctor_prescription_new():
 @web_bp.route('/doctor/examinations/history')
 def doctor_examinations_history():
     try:
-        response = requests.get('http://localhost:5000/medical_exams')
+        response = requests.get('http://localhost:5000/doctors/patients')
         response.raise_for_status()
         medical_exams= response.json()
     except requests.exceptions.RequestException as e:
@@ -75,7 +84,16 @@ def doctor_examinations_history():
 def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
+@web_bp.route('/doctor/statistics/medicine')
+def doctor_medication_usage():
+    return render_template('doctor/statistics_medicine.html')
+
 # ----------- BỆNH NHÂN -------------
+
+@web_bp.route('/patient/profile')
+def patient_profile():
+    return render_template('patient/profile.html')
+
 @web_bp.route('/patient/appointments')
 def patient_appointments():
     return render_template('patient/appointments.html', appointments=[])

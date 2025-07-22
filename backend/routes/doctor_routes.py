@@ -8,7 +8,7 @@ def get_doctors():
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM bac_si")
+        cursor.execute("SELECT * FROM bac_si bs JOIN chuyen_khoa ck ON ck.ma_chuyen_khoa = bs.ma_chuyen_khoa")
         data = cursor.fetchall()
         conn.close()
         return jsonify(data)
@@ -17,18 +17,23 @@ def get_doctors():
         return jsonify({'error': str(e)}), 500
 
 @doctor_bp.route('/doctors/<string:ma_bac_si>', methods=['GET'])
-def get_doctors_id(ma_bac_si):
+def get_doctor(ma_bac_si):
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT * FROM bac_si  WHERE ma_bac_si = %s"
+        sql = """
+            SELECT b.*, ck.ten_chuyen_khoa 
+            FROM bac_si b 
+            JOIN chuyen_khoa ck ON b.ma_chuyen_khoa = ck.ma_chuyen_khoa 
+            WHERE b.ma_bac_si = %s
+        """
         cursor.execute(sql, (ma_bac_si,))
-        data = cursor.fetchone()
+        result = cursor.fetchone()
         conn.close()
-        return jsonify(data)
+        return jsonify(result), 200
     except Exception as e:
-        print("Lỗi lấy thông tin bác sĩ:", e)
         return jsonify({'error': str(e)}), 500
+
 
 @doctor_bp.route('/doctors', methods=['POST'])
 def add_doctor():
@@ -101,15 +106,18 @@ def delete_doctor(ma_bac_si):
 def get_doctor_patient_count():
     try:
         ma_bac_si = request.args.get('ma_bac_si')
-        thang = request.args.get('thang', type=int)
-        nam = request.args.get('nam', type=int)
+        # thang = request.args.get('thang', type=int)
+        # nam = request.args.get('nam', type=int)
         
-        if not ma_bac_si or thang is None or nam is None:
-            return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
+        if not ma_bac_si:
+            return jsonify({'error': 'Thiếu tham số ma_bac_si'}), 400
+        # if not ma_bac_si or thang is None or nam is None:
+        #     return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
             
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
+        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, ))
+        # cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
         
         data = []
         for result in cursor.stored_results():

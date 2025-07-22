@@ -59,6 +59,8 @@ def add_medicine():
     except Exception as e:
         return jsonify({'error': f'Lỗi khi thêm thuốc: {str(e)}'}), 500
 
+
+
 @medicine_bp.route('/medicines/<ma_thuoc>', methods=['PUT'])
 def update_medicine(ma_thuoc):
     """Cập nhật thông tin thuốc"""
@@ -101,6 +103,9 @@ def update_medicine(ma_thuoc):
         return jsonify({'message': 'Cập nhật thuốc thành công'})
     except Exception as e:
         return jsonify({'error': f'Lỗi khi cập nhật thuốc: {str(e)}'}), 500
+
+
+
 
 @medicine_bp.route('/medicines/<ma_thuoc>', methods=['DELETE'])
 def delete_medicine(ma_thuoc):
@@ -154,3 +159,47 @@ def search_medicines():
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': f'Lỗi khi tìm kiếm thuốc: {str(e)}'}), 500
+    
+# Thống kê thuốc đã sử dụng
+@medicine_bp.route('/stats/medication/usage', methods=['GET'])
+def get_medication_usage():
+    try:
+        filter_type = request.args.get('filter_type')
+        filter_day = request.args.get('filter_day')
+        filter_month = request.args.get('filter_month', type=int)
+        filter_year = request.args.get('filter_year', type=int)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        if not filter_type or filter_type not in ['day', 'month', 'year', 'range']:
+            return jsonify({'error': 'Thiếu hoặc sai tham số filter_type'}), 400
+        
+        if filter_type == 'day' and not filter_day:
+            return jsonify({'error': 'Thiếu tham số filter_day'}), 400
+        if filter_type == 'month' and (not filter_month or not filter_year):
+            return jsonify({'error': 'Thiếu tham số filter_month hoặc filter_year'}), 400
+        if filter_type == 'year' and not filter_year:
+            return jsonify({'error': 'Thiếu tham số filter_year'}), 400
+        if filter_type == 'range' and (not start_date or not end_date):
+            return jsonify({'error': 'Thiếu tham số start_date hoặc end_date'}), 400
+        
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.callproc('ThongKeThuocSuDung', (
+            filter_type,
+            filter_day if filter_day else None,
+            filter_month if filter_month else 0,
+            filter_year if filter_year else 0,
+            start_date if start_date else None,
+            end_date if end_date else None
+        ))
+        
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+        
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        print("Lỗi thống kê thuốc sử dụng:", e)
+        return jsonify({'error': str(e)}), 500

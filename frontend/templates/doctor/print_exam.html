@@ -1,0 +1,212 @@
+{% extends 'base_doctor.html' %} {% block title %}In Phiếu Khám{% endblock %} {%
+block content %}
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #printable,
+    #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 20mm;
+      font-size: 12pt;
+    }
+    .no-print {
+      display: none;
+    }
+    .exam-card {
+      box-shadow: none !important;
+      border: none !important;
+    }
+  }
+
+  .exam-card {
+    border: 2px solid #000;
+    padding: 20mm;
+    max-width: 190mm;
+    margin: auto;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    font-family: "Times New Roman", Times, serif;
+  }
+
+  .exam-header {
+    text-align: center;
+    margin-bottom: 20mm;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+  }
+
+  .donthuoc {
+    margin-top: 20px;
+      text-decoration: black;
+  }
+
+  .exam-header h2 {
+    font-size: 24pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .exam-header p {
+    font-size: 14pt;
+    margin: 5px 0;
+  }
+
+  .exam-section p {
+    font-size: 12pt;
+    margin: 4px 0;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .exam-section strong {
+    display: inline-block;
+    width: 150px;
+    font-weight: bold;
+  }
+
+  .exam-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .exam-section th,
+  .exam-section td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+    font-size: 12pt;
+  }
+
+  .exam-section th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  .exam-footer {
+    margin-top: 30mm;
+    font-size: 12pt;
+  }
+
+  .exam-footer p {
+    margin: 15px 0;
+  }
+
+  .signature-block {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .signature-line {
+    border-top: 1px solid #000;
+    width: 200px;
+    text-align: center;
+    padding-top: 5px;
+  }
+</style>
+
+<div id="printable">
+  <div class="exam-card">
+    <div class="exam-header">
+      <h2>PHIẾU KHÁM BỆNH</h2>
+      <p>Phòng khám đa khoa ABC</p>
+      <p>Địa chỉ: 123 Đường Sức Khỏe, Quận 1, TP. HCM</p>
+      <p>Hotline: 0123 456 789</p>
+    </div>
+
+    <div class="exam-section">
+      <p><strong>Mã phiếu khám:</strong> <span id="ma_phieu_kham"></span></p>
+      <p><strong>Tên bệnh nhân:</strong> <span id="ten_benh_nhan"></span></p>
+      <p><strong>Ngày khám:</strong> <span id="ngay_kham"></span></p>
+      <p><strong>Triệu chứng:</strong> <span id="trieu_chung"></span></p>
+      <p><strong>Chẩn đoán:</strong> <span id="chan_doan"></span></p>
+    </div>
+    <div class="exam-section">
+        <div class="donthuoc">                        </div>
+      <h4 style="">Đơn Thuốc</h4>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th style="width: 40%">Tên thuốc</th>
+            <th style="width: 30%">Liều dùng</th>
+            <th style="width: 30%">Cách dùng</th>
+          </tr>
+        </thead>
+        <tbody id="don_thuoc_body">
+          <!-- Dữ liệu thuốc sẽ được thêm bằng JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam-footer">
+      <p style="text-align: right">Ngày in: <span id="ngay_in"></span></p>
+      <div class="signature-block">
+        <p class="signature-line">Bác sĩ ký tên</p>
+        <p class="signature-line">Bệnh nhân ký tên</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-4 no-print">
+  <button class="btn btn-success" onclick="window.print()">
+    🖨️ In Phiếu Khám
+  </button>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    const maPhieuKham = {{ ma_phieu_kham }};
+    try {
+      const response = await fetch(`http://localhost:5000/medical_exams/${maPhieuKham}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert("❌ Không tìm thấy phiếu khám!");
+        return;
+      }
+
+      // Hiển thị dữ liệu phiếu khám
+      document.getElementById("ma_phieu_kham").textContent = data.ma_phieu_kham;
+      document.getElementById("ten_benh_nhan").textContent = data.ten_benh_nhan;
+      document.getElementById("ngay_kham").textContent = new Date(data.ngay_kham).toLocaleString("vi-VN");
+      document.getElementById("trieu_chung").textContent = data.trieu_chung;
+      document.getElementById("chan_doan").textContent = data.chan_doan;
+
+      // Hiển thị ngày in
+      document.getElementById("ngay_in").textContent = new Date().toLocaleDateString("vi-VN");
+
+      // Lấy đơn thuốc từ API
+      const resThuoc = await fetch(`http://localhost:5000/prescriptions/${maPhieuKham}`);
+      const thuocData = await resThuoc.json();
+
+      if (resThuoc.ok && Array.isArray(thuocData)) {
+        const tbody = document.getElementById("don_thuoc_body");
+        thuocData.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.ten_thuoc}</td>
+            <td>${item.lieu_dung || ""}</td>
+            <td>${item.cach_dung || ""}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        console.warn("Không có đơn thuốc hoặc lỗi dữ liệu");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Lỗi kết nối máy chủ!");
+    }
+  });
+</script>
+{% endblock %}
