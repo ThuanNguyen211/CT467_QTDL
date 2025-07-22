@@ -85,6 +85,11 @@ def doctor_statistics():
     return render_template('doctor/statistics.html', stats={'so_benh_nhan': 0, 'doanh_thu': 0})
 
 # ----------- BỆNH NHÂN -------------
+
+@web_bp.route('/patient/profile')
+def patient_profile():
+    return render_template('patient/profile.html')
+
 @web_bp.route('/patient/appointments')
 def patient_appointments():
     return render_template('patient/appointments.html', appointments=[])
