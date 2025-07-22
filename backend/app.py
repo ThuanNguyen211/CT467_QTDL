@@ -10,8 +10,11 @@ from routes.medicine_routes import medicine_bp
 from routes.patient_routes import patient_bp
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/main
 app = Flask(__name__)
 CORS(app)
 

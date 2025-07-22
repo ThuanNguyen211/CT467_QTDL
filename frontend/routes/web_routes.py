@@ -13,11 +13,6 @@ def home():
 def login():
     return render_template('login.html')
 
-@web_bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/login')
-
 
 # ----------- BÁC SĨ -------------
 @web_bp.route('/doctor/profile')
@@ -37,14 +32,17 @@ def doctor_medicines():
     return render_template('doctor/medicines.html', medicines=medicines)
 
 
-# Thêm thuốc
+# Thêm thuốc (Tín)
 @web_bp.route('/doctor/medicines/new', methods=['GET', 'POST'])
 def doctor_medicine_new():
     return render_template('doctor/medicine_form.html', medicine=None)
 
+
+
+
 @web_bp.route('/doctor/medicines/<ma_thuoc>/edit', methods=['GET', 'POST'])
 def doctor_medicine_edit(ma_thuoc):
-    return render_template('doctor/medicine_form.html', medicine={})
+    return render_template('doctor/medicine_form.html', medicine_id=ma_thuoc)
 
 @web_bp.route('/doctor/departments')
 def doctor_departments():
@@ -74,7 +72,7 @@ def doctor_prescription_new():
 @web_bp.route('/doctor/examinations/history')
 def doctor_examinations_history():
     try:
-        response = requests.get('http://localhost:5000/medical_exams')
+        response = requests.get('http://localhost:5000/doctors/patients')
         response.raise_for_status()
         medical_exams= response.json()
     except requests.exceptions.RequestException as e:
