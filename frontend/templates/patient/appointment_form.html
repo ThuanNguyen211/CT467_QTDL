@@ -5,7 +5,7 @@
 <form method="post">
   <div class="mb-3">
     <label class="form-label">Chọn bác sĩ</label>
-    <select class="form-select" name="ma_bac_si" required>
+    <select class="form-select" name="ma_bac_si" id="ma_bac_si" required>
       {% for doctor in doctors %}
       <option value="{{ doctor.ma_bac_si }}">{{ doctor.ten_bac_si }} ({{ doctor.ten_chuyen_khoa }})</option>
       {% endfor %}
@@ -13,11 +13,11 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Ngày khám</label>
-    <input type="date" class="form-control" name="ngay_hen" required>
+    <input type="date" class="form-control" name="ngay_hen" id="ngay_hen" required>
   </div>
   <div class="mb-3">
     <label class="form-label">Giờ khám</label>
-    <select class="form-select" name="gio_hen" required>
+    <select class="form-select" name="gio_hen" id="gio_hen" required>
       {% for slot in available_times %}
       <option value="{{ slot }}">{{ slot }}</option>
       {% endfor %}
@@ -25,4 +25,87 @@
   </div>
   <button type="submit" class="btn btn-primary">Đặt lịch</button>
 </form>
+<script>
+
+// Lấy danh sách bác sĩ và đổ vào select
+async function fetchDoctors() {
+  const response = await fetch('http://127.0.0.1:5000/doctors');
+  const doctors = await response.json();
+  const select = document.getElementById('ma_bac_si');
+  select.innerHTML = '';
+  doctors.forEach(doctor => {
+    const option = document.createElement('option');
+    option.value = doctor.ma_bac_si;
+    option.textContent = `${doctor.ten_bac_si} (${doctor.ten_chuyen_khoa || ''})`;
+    select.appendChild(option);
+  });
+}
+
+let availableTimes = [];
+
+async function fetchAvailableSlots() {
+  const ma_bac_si = document.getElementById('ma_bac_si').value;
+  const ngay_hen = document.getElementById('ngay_hen').value;
+  if (!ma_bac_si || !ngay_hen) return;
+
+  const response = await fetch(`http://127.0.0.1:5000/booking/available-slots?ma_bac_si=${ma_bac_si}&ngay=${ngay_hen}`);
+  const data = await response.json();
+
+  const gioHenSelect = document.getElementById('gio_hen');
+  gioHenSelect.innerHTML = '';
+  data.forEach(slot => {
+    const option = document.createElement('option');
+    option.value = slot.gio; // Lấy giá trị từ key "gio"
+    option.textContent = slot.gio;
+    gioHenSelect.appendChild(option);
+  });
+}
+
+
+// Gọi khi trang vừa load
+window.addEventListener('DOMContentLoaded', async function() {
+  await fetchDoctors();
+  fetchAvailableSlots(); // Gọi luôn hàm lấy giờ trống nếu muốn tự động cập nhật
+});
+
+// Gọi khi chọn bác sĩ hoặc ngày khám
+document.getElementById('ma_bac_si').addEventListener('change', fetchAvailableSlots);
+document.getElementById('ngay_hen').addEventListener('change', fetchAvailableSlots);
+
+// Kiểm tra lại giờ trước khi submit
+document.querySelector('form').onsubmit = async function(e) {
+  e.preventDefault();
+  const ma_benh_nhan = localStorage.getItem('ma_benh_nhan');
+  if (!ma_benh_nhan) {
+    alert('Không tìm thấy mã bệnh nhân!');
+    return;
+  }
+  const gio_hen = document.getElementById('gio_hen').value;
+  if (availableTimes.includes(gio_hen)) {
+    alert('Khung giờ này đã được đặt, vui lòng chọn lại!');
+    await fetchAvailableSlots(); // Cập nhật lại giờ trống
+    return;
+  }
+  const formData = new FormData(this);
+  const data = {
+    ma_benh_nhan: ma_benh_nhan,
+    ma_bac_si: formData.get('ma_bac_si'),
+    ngay_hen: formData.get('ngay_hen'),
+    gio_hen: formData.get('gio_hen'),
+    trang_thai: 'Đã đặt'
+  };
+  const response = await fetch('http://127.0.0.1:5000/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+  const result = await response.json();
+  if (response.ok) {
+    alert('Đặt lịch thành công!');
+    window.location.href = '/patient/appointments';
+  } else {
+    alert(result.error || 'Đặt lịch thất bại!');
+  }
+};
+</script>
 {% endblock %} 

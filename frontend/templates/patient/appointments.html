@@ -16,11 +16,6 @@
       <td>{{ appt.ngay_hen }}</td>
       <td>{{ appt.gio_hen }}</td>
       <td>{{ appt.trang_thai }}</td>
-      <td>
-        {% if appt.trang_thai == 'Chờ khám' %}
-        <a href="/patient/appointments/{{ appt.ma_lich_hen }}/cancel" class="btn btn-sm btn-danger">Hủy</a>
-        {% endif %}
-      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -44,9 +39,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       <td>${appt.ngay_hen}</td>
       <td>${appt.gio_hen}</td>
       <td>${appt.trang_thai}</td>
-      <td>
-        ${appt.trang_thai === 'Chờ khám' ? `<a href="/patient/appointments/${appt.ma_lich_hen}/cancel" class="btn btn-sm btn-danger">Hủy</a>` : ''}
-      </td>
     `;
     tbody.appendChild(tr);
   });

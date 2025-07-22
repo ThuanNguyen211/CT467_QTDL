@@ -3,6 +3,7 @@ from flask_cors import CORS
 from routes.web_routes import web_bp
 
 
+
 app = Flask(__name__)
 CORS(app)
 
