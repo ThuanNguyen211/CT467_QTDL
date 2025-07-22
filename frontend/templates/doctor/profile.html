@@ -4,63 +4,84 @@
 <h2>Thông tin cá nhân</h2>
 <div id="doctor-info"></div>
 <script>
-  var ma_bac_si = localStorage.getItem('ma_bac_si');
+  const ma_bac_si = localStorage.getItem('ma_bac_si');
   console.log("ma_bac_si trong localStorage:", ma_bac_si);
 
   if (ma_bac_si) {
-    fetch('http://localhost:5000/doctors/' + ma_bac_si)
-      .then(response => {
-        console.log("Status API:", response.status);
-        return response.json();
-      })
-      .then(doctor => {
-        console.log("Dữ liệu trả về từ API:", doctor);
-        document.getElementById('doctor-info').innerHTML = `
-          <form id="update-form">
-            <div class="mb-3">
-              <label class="form-label">Mã bác sĩ</label>
-              <input type="text" class="form-control" name="ma_bac_si" value="${doctor.ma_bac_si}" readonly>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Tên bác sĩ</label>
-              <input type="text" class="form-control" name="ten_bac_si" value="${doctor.ten_bac_si}">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Chuyên khoa</label>
-              <input type="text" class="form-control" name="ten_chuyen_khoa" value="${doctor.ten_chuyen_khoa}" readonly>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Số điện thoại</label>
-              <input type="text" class="form-control" name="so_dien_thoai" value="${doctor.so_dien_thoai}">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Kinh nghiệm (năm)</label>
-              <input type="number" class="form-control" name="kinh_nghiem" value="${doctor.kinh_nghiem}">
-            </div>
-            <button type="submit" class="btn btn-primary">Cập nhật</button>
-          </form>
-        `;
-        // Chặn submit mặc định và xử lý PUT
+    Promise.all([
+      fetch('http://localhost:5000/doctors/' + ma_bac_si).then(res => res.json()),
+      fetch('http://localhost:5000/specialty').then(res => res.json())
+    ])
+      .then(([doctor, specialties]) => {
+        console.log("Thông tin bác sĩ:", doctor);
+        console.log("Danh sách chuyên khoa:", specialties);
+
+        // Render form
+        const formHTML = `
+        <form id="update-form">
+          <div class="mb-3">
+            <label class="form-label">Mã bác sĩ</label>
+            <input type="text" class="form-control" name="ma_bac_si" value="${doctor.ma_bac_si}" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tên bác sĩ</label>
+            <input type="text" class="form-control" name="ten_bac_si" value="${doctor.ten_bac_si}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Chuyên khoa</label>
+            <select class="form-select" name="ma_chuyen_khoa" id="specialty-select"></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" name="so_dien_thoai" value="${doctor.so_dien_thoai}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Kinh nghiệm (năm)</label>
+            <input type="number" class="form-control" name="kinh_nghiem" value="${doctor.kinh_nghiem}">
+          </div>
+          <button type="submit" class="btn btn-primary">Cập nhật</button>
+        </form>
+      `;
+        document.getElementById('doctor-info').innerHTML = formHTML;
+
+        // Gán options vào dropdown
+        const selectElement = document.getElementById('specialty-select');
+        specialties.forEach(specialty => {
+          const option = document.createElement('option');
+          option.value = specialty.ma_chuyen_khoa;
+          option.textContent = specialty.ten_chuyen_khoa;
+          if (doctor.ma_chuyen_khoa === specialty.ma_chuyen_khoa) {
+            option.selected = true;
+          }
+          selectElement.appendChild(option);
+        });
+
+        // Xử lý cập nhật thông tin
         document.getElementById('update-form').addEventListener('submit', function (e) {
           e.preventDefault();
-          console.log("Đã chặn submit, chuẩn bị gửi PUT!");
-          // Lấy dữ liệu từ form
-          const data = {
+          const updatedData = {
             ten_bac_si: document.querySelector('input[name="ten_bac_si"]').value,
-            ma_chuyen_khoa: doctor.ma_chuyen_khoa, // lấy từ object doctor đã fetch về
+            ma_chuyen_khoa: document.querySelector('select[name="ma_chuyen_khoa"]').value,
             so_dien_thoai: document.querySelector('input[name="so_dien_thoai"]').value,
             kinh_nghiem: document.querySelector('input[name="kinh_nghiem"]').value
           };
           fetch('http://localhost:5000/doctors/' + ma_bac_si, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(updatedData)
           })
             .then(res => res.json())
             .then(result => {
               alert(result.message || "Cập nhật thành công!");
+            })
+            .catch(error => {
+              alert("Lỗi khi cập nhật: " + error);
             });
         });
+      })
+      .catch(err => {
+        console.error("Lỗi khi tải dữ liệu:", err);
+        document.getElementById('doctor-info').innerHTML = "<p>Lỗi khi tải dữ liệu bác sĩ hoặc chuyên khoa.</p>";
       });
   } else {
     console.error("Không tìm thấy mã bác sĩ trong localStorage");

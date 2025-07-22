@@ -17,18 +17,23 @@ def get_doctors():
         return jsonify({'error': str(e)}), 500
 
 @doctor_bp.route('/doctors/<string:ma_bac_si>', methods=['GET'])
-def get_doctors_id(ma_bac_si):
+def get_doctor(ma_bac_si):
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        sql = "SELECT * FROM bac_si  WHERE ma_bac_si = %s"
+        sql = """
+            SELECT b.*, ck.ten_chuyen_khoa 
+            FROM bac_si b 
+            JOIN chuyen_khoa ck ON b.ma_chuyen_khoa = ck.ma_chuyen_khoa 
+            WHERE b.ma_bac_si = %s
+        """
         cursor.execute(sql, (ma_bac_si,))
-        data = cursor.fetchone()
+        result = cursor.fetchone()
         conn.close()
-        return jsonify(data)
+        return jsonify(result), 200
     except Exception as e:
-        print("Lỗi lấy thông tin bác sĩ:", e)
         return jsonify({'error': str(e)}), 500
+
 
 @doctor_bp.route('/doctors', methods=['POST'])
 def add_doctor():
