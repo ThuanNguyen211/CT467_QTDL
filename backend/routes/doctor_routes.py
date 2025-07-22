@@ -8,7 +8,7 @@ def get_doctors():
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM bac_si")
+        cursor.execute("SELECT * FROM bac_si bs JOIN chuyen_khoa ck ON ck.ma_chuyen_khoa = bs.ma_chuyen_khoa")
         data = cursor.fetchall()
         conn.close()
         return jsonify(data)
