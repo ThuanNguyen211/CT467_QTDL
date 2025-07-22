@@ -15,6 +15,7 @@ def get_specialty():
     except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+
 @specialty_bp.route('/specialty/<string:ma_chuyen_khoa>', methods=['GET'])
 def get_specialty_id(ma_chuyen_khoa):
     try:
