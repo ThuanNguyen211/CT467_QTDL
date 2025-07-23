@@ -88,7 +88,9 @@ def doctor_statistics():
 def doctor_statistics_patients():
     return render_template('doctor/statistics_patients.html', patients=[])
 
-
+@web_bp.route('/doctor/statistics/medicine')
+def doctor_medication_usage():
+    return render_template('doctor/statistics_medicine.html')
 # Ngọc thêm 
 # from flask import Blueprint, request, jsonify
 # import requests
