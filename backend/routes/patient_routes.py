@@ -173,3 +173,67 @@ def get_patient_history():
     except Exception as e:
         print("Lỗi lấy lịch sử khám bệnh:", e)
         return jsonify({'error': str(e)}), 500
+
+@patient_bp.route('/stats/patient/usage', methods=['GET'])
+def get_patient_usage():
+    response = {'patients': [], 'total_patients': 0, 'total_visits': 0}
+    try:
+        filter_type = request.args.get('filter_type')
+        filter_day = request.args.get('filter_day')
+        filter_month = request.args.get('filter_month', type=int)
+        filter_year = request.args.get('filter_year', type=int)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        if not filter_type or filter_type not in ['day', 'month', 'year', 'range']:
+            response['error'] = 'Thiếu hoặc sai tham số filter_type, phải là day, month, year, hoặc range'
+            return jsonify(response), 400
+
+        if filter_type == 'day' and not filter_day:
+            response['error'] = 'Thiếu tham số filter_day cho filter_type=day'
+            return jsonify(response), 400
+        if filter_type == 'month' and (not filter_month or not filter_year):
+            response['error'] = 'Thiếu tham số filter_month hoặc filter_year cho filter_type=month'
+            return jsonify(response), 400
+        if filter_type == 'year' and not filter_year:
+            response['error'] = 'Thiếu tham số filter_year cho filter_type=year'
+            return jsonify(response), 400
+        if filter_type == 'range' and (not start_date or not end_date):
+            response['error'] = 'Thiếu tham số start_date hoặc end_date cho filter_type=range'
+            return jsonify(response), 400
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        if filter_type == 'day':
+            try:
+                year, month, day = map(int, filter_day.split('-'))
+                cursor.callproc('ThongKeBenhNhanBacSi', ('ALL', day, month, year, None, None))
+            except (ValueError, IndexError):
+                response['error'] = 'Định dạng filter_day không hợp lệ, yêu cầu YYYY-MM-DD'
+                conn.close()
+                return jsonify(response), 400
+        elif filter_type == 'month':
+            cursor.callproc('ThongKeBenhNhanBacSi', ('ALL', 0, filter_month, filter_year, None, None))
+        elif filter_type == 'year':
+            cursor.callproc('ThongKeBenhNhanBacSi', ('ALL', 0, 0, filter_year, None, None))
+        elif filter_type == 'range':
+            cursor.callproc('ThongKeBenhNhanBacSi', ('ALL', 0, 0, 0, start_date, end_date))
+
+        data = []
+        for result in cursor.stored_results():
+            data = result.fetchall()
+
+        response['patients'] = data or []
+        response['total_patients'] = len(set(item['ma_benh_nhan'] for item in data)) if data else 0
+        response['total_visits'] = sum(item['so_lan_kham'] for item in data) if data else 0
+
+        conn.close()
+        return jsonify(response), 200
+
+    except Exception as e:
+        print("Lỗi thống kê bệnh nhân:", e)
+        response['error'] = f'Lỗi server: {str(e)}'
+        if 'conn' in locals():
+            conn.close()
+        return jsonify(response), 500

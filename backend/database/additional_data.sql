@@ -40,8 +40,10 @@ INSERT INTO thuoc (ten_thuoc, don_vi, gia) VALUES
 ('Vitamin C', 'Viên', 4000.0);
 
 -- Thêm lịch hẹn mới
+SET FOREIGN_KEY_CHECKS = 0;
+SELECT * FROM lich_hen;
 INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai) VALUES
-(4, 4, '2025-07-15', '08:00:00', 'Đã khám'),
+(1, 1, '2025-07-15', '15:00:00', 'Đã khám'),
 (5, 5, '2025-07-15', '10:00:00', 'Đã khám'),
 (6, 6, '2025-07-15', '13:00:00', 'Đã khám'),
 (4, 1, '2025-07-16', '09:30:00', 'Đã khám'),
@@ -64,22 +66,22 @@ INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai) VA
 
 -- Thêm phiếu khám mới
 INSERT INTO phieu_kham (ma_lich_hen, trieu_chung, chan_doan, ngay_kham) VALUES
-(4, 'Đau ngực, khó thở', 'Bệnh tim mạch', '2025-07-15'),
-(5, 'Phát ban, ngứa', 'Viêm da dị ứng', '2025-07-15'),
-(6, 'Đau đầu, chóng mặt', 'Rối loạn tiền đình', '2025-07-15'),
-(7, 'Sốt, đau họng', 'Viêm họng', '2025-07-16'),
-(8, 'Đau bụng, tiêu chảy', 'Rối loạn tiêu hóa', '2025-07-16'),
-(9, 'Sốt, mệt mỏi', 'Cảm cúm', '2025-07-16'),
-(10, 'Tức ngực', 'Tăng huyết áp', '2025-07-17'),
-(11, 'Nổi mẩn đỏ', 'Dị ứng da', '2025-07-17'),
-(12, 'Đau đầu, mất ngủ', 'Suy nhược thần kinh', '2025-07-17'),
-(13, 'Sốt, đau họng', 'Viêm họng cấp', '2025-07-18'),
-(14, 'Mệt mỏi, đau đầu', 'Thiếu máu', '2025-07-18'),
-(15, 'Đau bụng, buồn nôn', 'Rối loạn tiêu hóa', '2025-07-18'),
-(16, 'Ho, khó thở', 'Viêm phế quản', '2025-07-19'),
-(17, 'Tức ngực, hồi hộp', 'Rối loạn nhịp tim', '2025-07-19'),
-(18, 'Đau lưng, mệt mỏi', 'Thoái hóa cột sống', '2025-07-19');
-
+(65, 'Đau ngực, khó thở', 'Bệnh tim mạch', '2025-07-15'),
+(46, 'Phát ban, ngứa', 'Viêm da dị ứng', '2025-07-15'),
+(47, 'Đau đầu, chóng mặt', 'Rối loạn tiền đình', '2025-07-15'),
+(48, 'Sốt, đau họng', 'Viêm họng', '2025-07-16'),
+(49, 'Đau bụng, tiêu chảy', 'Rối loạn tiêu hóa', '2025-07-16'),
+(50, 'Sốt, mệt mỏi', 'Cảm cúm', '2025-07-16'),
+(51, 'Tức ngực', 'Tăng huyết áp', '2025-07-17'),
+(52, 'Nổi mẩn đỏ', 'Dị ứng da', '2025-07-17'),
+(53, 'Đau đầu, mất ngủ', 'Suy nhược thần kinh', '2025-07-17'),
+(54, 'Sốt, đau họng', 'Viêm họng cấp', '2025-07-18'),
+(55, 'Mệt mỏi, đau đầu', 'Thiếu máu', '2025-07-18'),
+(56, 'Đau bụng, buồn nôn', 'Rối loạn tiêu hóa', '2025-07-18'),
+(57, 'Ho, khó thở', 'Viêm phế quản', '2025-07-19'),
+(58, 'Tức ngực, hồi hộp', 'Rối loạn nhịp tim', '2025-07-19'),
+(59, 'Đau lưng, mệt mỏi', 'Thoái hóa cột sống', '2025-07-19');
+SELECT * FROM bac_si;
 -- Thêm đơn thuốc mới
 INSERT INTO don_thuoc (ma_phieu_kham, ma_thuoc, so_luong, lieu_dung, cach_dung) VALUES
 (4, 4, 20, '1 viên/lần', 'Uống sau ăn'),
@@ -97,6 +99,7 @@ INSERT INTO don_thuoc (ma_phieu_kham, ma_thuoc, so_luong, lieu_dung, cach_dung) 
 (16, 7, 12, '1 viên/lần', 'Uống sau ăn'),
 (17, 8, 10, '1 viên/lần', 'Uống trước ăn'),
 (18, 9, 15, '1 viên/lần', 'Uống buổi tối');
+
 
 -- Thêm người dùng mới
 INSERT INTO nguoi_dung (email, ma_bac_si, ma_benh_nhan, mat_khau, role) VALUES

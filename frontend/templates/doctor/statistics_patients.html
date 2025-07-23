@@ -1,36 +1,394 @@
-{% extends "base_doctor.html" %}
-
-{% block title %}Thống kê bệnh nhân{% endblock %}
-
+{% extends 'base_doctor.html' %}
+{% block title %}Thống kê Số lượng Bệnh Nhân{% endblock %}
 {% block content %}
-<h2>Thống kê bệnh nhân</h2>
+<h2>Thống kê Số lượng Bệnh Nhân</h2>
+<hr />
 
+<div class="row mb-3">
+    <div class="col-md-2">
+        <strong>Loại thống kê</strong>
+        <select id="filterType" class="form-control">
+            <option value="day" selected>Theo ngày</option>
+            <option value="month">Theo tháng</option>
+            <option value="year">Theo năm</option>
+            <option value="range">Theo khoảng thời gian</option>
+        </select>
+    </div>
+    <div class="col-md-2" id="dayFilter">
+        <strong>Ngày</strong>
+        <input type="date" id="filterDay" class="form-control">
+    </div>
+    <div class="col-md-2" id="monthFilter" style="display: none;">
+        <strong>Tháng</strong>
+        <select id="filterMonth" class="form-control">
+            {% for i in range(1, 13) %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2" id="yearFilter" style="display: none;">
+        <strong>Năm</strong>
+        <select id="filterYear" class="form-control">
+            {% for i in range(2020, 2026) %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2" id="rangeFilter" style="display: none;">
+        <strong>Từ ngày</strong>
+        <input type="date" id="startDate" class="form-control">
+    </div>
+    <div class="col-md-2" id="rangeFilterEnd" style="display: none;">
+        <strong>Đến ngày</strong>
+        <input type="date" id="endDate" class="form-control">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button id="clearFilters" class="btn btn-danger">Làm mới</button>
+    </div>
+    <div class="col-md-4 d-flex align-items-end justify-content-end">
+        <button id="exportPdf" class="btn btn-primary me-2">Xuất PDF</button>
+        <button id="exportXls" class="btn btn-success">Xuất XLS</button>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <strong>Tổng số bệnh nhân: </strong><span id="totalPatients">0</span>
+    </div>
+    <div class="col-md-6">
+        <strong>Tổng số lượt khám: </strong><span id="totalVisits">0</span>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th onclick="sortTable('stt')" class="text-center">STT ↕</th>
+            <th onclick="sortTable('ten_benh_nhan')" class="text-center">Tên bệnh nhân ↕</th>
+            <th onclick="sortTable('ngay_kham')" class="text-center">Ngày khám ↕</th>
+            <th onclick="sortTable('so_lan_kham')" class="text-center">Số lần khám ↕</th>
+        </tr>
+    </thead>
+    <tbody id="patientTbody"></tbody>
+</table>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const maBacSi = localStorage.getItem('ma_bac_si');
-        console.log("ma_bac_si trong localStorage:", ma_bac_si);
-        if (!maBacSi) {
-            alert('Không tìm thấy mã bác sĩ trong localStorage');
+    let patientData = [];
+    let sortedData = [];
+    let sortField = 'so_lan_kham';
+    let sortAsc = false;
+
+    function formatDateDisplay(str) {
+        if (!str) return '';
+        const date = new Date(str);
+        return date.toLocaleDateString('vi-VN');
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('patientTbody');
+        tbody.innerHTML = '';
+        data.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center">${index + 1}</td>
+                <td>${item.ten_benh_nhan || 'N/A'}</td>
+                <td class="text-center">${formatDateDisplay(item.ngay_kham)}</td>
+                <td class="text-center">${item.so_lan_kham || 0}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function sortTable(field) {
+        sortAsc = sortField === field ? !sortAsc : true;
+        sortField = field;
+        sortedData.sort((a, b) => {
+            let valA = a[field] || '', valB = b[field] || '';
+            if (field === 'so_lan_kham') {
+                valA = Number(valA) || 0;
+                valB = Number(valB) || 0;
+            } else if (field === 'stt') {
+                valA = sortedData.indexOf(a) + 1;
+                valB = sortedData.indexOf(b) + 1;
+            }
+            return sortAsc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
+        renderTable(sortedData);
+    }
+
+    async function fetchPatientData() {
+        const filterType = document.getElementById('filterType').value || 'day';
+        let filterDay = document.getElementById('filterDay').value;
+        let filterMonth = document.getElementById('filterMonth').value;
+        let filterYear = document.getElementById('filterYear').value;
+        let startDate = document.getElementById('startDate').value;
+        let endDate = document.getElementById('endDate').value;
+
+        // Đặt giá trị mặc định
+        const today = new Date().toISOString().slice(0, 10); // 2025-07-23
+        if (filterType === 'day' && !filterDay) {
+            filterDay = today;
+            document.getElementById('filterDay').value = today;
+        }
+        if (filterType === 'month' && !filterMonth) {
+            filterMonth = (new Date().getMonth() + 1).toString();
+            document.getElementById('filterMonth').value = filterMonth;
+        }
+        if ((filterType === 'month' || filterType === 'year') && !filterYear) {
+            filterYear = new Date().getFullYear().toString();
+            document.getElementById('filterYear').value = filterYear;
+        }
+        if (filterType === 'range' && (!startDate || !endDate)) {
+            startDate = today;
+            endDate = today;
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+        }
+
+        // Kiểm tra tính hợp lệ của tham số
+        if (filterType === 'day' && !filterDay.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            alert('Vui lòng chọn ngày hợp lệ (YYYY-MM-DD)');
+            return;
+        }
+        if (filterType === 'month' && (!filterMonth || !filterYear)) {
+            alert('Vui lòng chọn tháng và năm hợp lệ');
+            return;
+        }
+        if (filterType === 'year' && !filterYear) {
+            alert('Vui lòng chọn năm hợp lệ');
+            return;
+        }
+        if (filterType === 'range' && (!startDate.match(/^\d{4}-\d{2}-\d{2}$/) || !endDate.match(/^\d{4}-\d{2}-\d{2}$/))) {
+            alert('Vui lòng chọn khoảng thời gian hợp lệ (YYYY-MM-DD)');
             return;
         }
 
-        fetch(`/doctor/statistics/patients?ma_bac_si=${maBacSi}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Lỗi khi gọi API');
-                }
-                return response.text(); // nếu trả về HTML
-            })
-            .then(data => {
-                document.getElementById('patient-statistics').innerHTML = data;
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-            });
-    });
-</script>
+        let url = `http://127.0.0.1:5000/stats/patient/usage?filter_type=${filterType}`;
+        if (filterType === 'day') url += `&filter_day=${filterDay}`;
+        if (filterType === 'month') url += `&filter_month=${filterMonth}&filter_year=${filterYear}`;
+        if (filterType === 'year') url += `&filter_year=${filterYear}`;
+        if (filterType === 'range') url += `&start_date=${startDate}&end_date=${endDate}`;
 
-<!-- Nơi hiển thị kết quả -->
-<div id="patient-statistics"></div>
+        try {
+            console.log('Fetching URL (patient):', url);
+            const response = await fetch(url);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP error: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('API response (patient):', data);
+            if (!Array.isArray(data.patients)) {
+                console.warn('Invalid data format:', data);
+                throw new Error(data.error || 'Dữ liệu không hợp lệ: patients không phải là mảng');
+            }
+            if (data.error) {
+                console.warn('API returned an error:', data.error);
+                throw new Error(data.error);
+            }
+            patientData = data.patients;
+            sortedData = [...patientData];
+            document.getElementById('totalPatients').textContent = data.total_patients || 0;
+            document.getElementById('totalVisits').textContent = data.total_visits || 0;
+            renderTable(sortedData);
+        } catch (err) {
+            console.error('Lỗi khi lấy dữ liệu bệnh nhân:', err);
+            alert('Lỗi khi lấy dữ liệu bệnh nhân: ' + err.message);
+            patientData = [];
+            sortedData = [];
+            document.getElementById('totalPatients').textContent = 'N/A';
+            document.getElementById('totalVisits').textContent = 'N/A';
+            renderTable([]);
+        }
+    }
+
+    async function fetchDoctorPatientCount() {
+        const ma_bac_si = localStorage.getItem('ma_bac_si');
+        if (!ma_bac_si) {
+            console.warn('Không tìm thấy mã bác sĩ trong local storage');
+            return; // Không gọi API nếu thiếu ma_bac_si
+        }
+
+        const filterType = document.getElementById('filterType').value;
+        let ngay = 0, thang = 0, nam = 0, start_date = null, end_date = null;
+
+        if (filterType === 'day') {
+            const date = document.getElementById('filterDay').value;
+            if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                alert('Vui lòng chọn ngày hợp lệ (YYYY-MM-DD)');
+                return;
+            }
+            const d = new Date(date);
+            ngay = d.getDate();
+            thang = d.getMonth() + 1;
+            nam = d.getFullYear();
+        } else if (filterType === 'month') {
+            thang = document.getElementById('filterMonth').value;
+            nam = document.getElementById('filterYear').value;
+            if (!thang || !nam) {
+                alert('Vui lòng chọn tháng và năm hợp lệ');
+                return;
+            }
+        } else if (filterType === 'year') {
+            nam = document.getElementById('filterYear').value;
+            if (!nam) {
+                alert('Vui lòng chọn năm hợp lệ');
+                return;
+            }
+        } else if (filterType === 'range') {
+            start_date = document.getElementById('startDate').value;
+            end_date = document.getElementById('endDate').value;
+            if (!start_date.match(/^\d{4}-\d{2}-\d{2}$/) || !end_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                alert('Vui lòng chọn khoảng thời gian hợp lệ (YYYY-MM-DD)');
+                return;
+            }
+        }
+
+        let url = `http://127.0.0.1:5000/doctors/patients?ma_bac_si=${ma_bac_si}&ngay=${ngay}&thang=${thang}&nam=${nam}`;
+        if (start_date && end_date) {
+            url += `&start_date=${start_date}&end_date=${end_date}`;
+        }
+
+        try {
+            console.log('Fetching URL (doctor):', url);
+            const response = await fetch(url);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP error: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('API response (doctor):', data);
+            if (!Array.isArray(data.patients)) {
+                console.warn('Invalid data format:', data);
+                throw new Error(data.error || 'Dữ liệu không hợp lệ: patients không phải là mảng');
+            }
+            if (data.error) {
+                console.warn('API returned an error:', data.error);
+                throw new Error(data.error);
+            }
+            patientData = data.patients;
+            sortedData = [...patientData];
+            document.getElementById('totalPatients').textContent = data.total_patients || 0;
+            document.getElementById('totalVisits').textContent = data.total_visits || 0;
+            renderTable(sortedData);
+        } catch (err) {
+            console.error('Lỗi lấy dữ liệu bác sĩ:', err);
+            alert('Lỗi lấy dữ liệu bác sĩ: ' + err.message);
+            patientData = [];
+            sortedData = [];
+            document.getElementById('totalPatients').textContent = 'N/A';
+            document.getElementById('totalVisits').textContent = 'N/A';
+            renderTable([]);
+        }
+    }
+
+    function exportXls() {
+        if (!sortedData.length) return alert("Không có dữ liệu để xuất.");
+        const ws = XLSX.utils.json_to_sheet(
+            sortedData.map((item, index) => ({
+                STT: index + 1,
+                'Tên bệnh nhân': item.ten_benh_nhan || 'N/A',
+                'Ngày khám': formatDateDisplay(item.ngay_kham),
+                'Số lần khám': item.so_lan_kham || 0
+            }))
+        );
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'BenhNhan');
+        XLSX.writeFile(wb, 'ThongKeBenhNhan.xlsx');
+    }
+
+    function exportPdf() {
+        if (!sortedData.length) return alert("Không có dữ liệu để xuất.");
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("BÁO CÁO THỐNG KÊ BỆNH NHÂN", 10, 10);
+        doc.text(`Tổng số bệnh nhân: ${document.getElementById('totalPatients').textContent}`, 10, 20);
+        doc.text(`Tổng số lượt khám: ${document.getElementById('totalVisits').textContent}`, 10, 30);
+        doc.autoTable({
+            head: [['STT', 'Tên bệnh nhân', 'Ngày khám', 'Số lần khám']],
+            body: sortedData.map((item, index) => [
+                index + 1,
+                item.ten_benh_nhan || 'N/A',
+                formatDateDisplay(item.ngay_kham),
+                item.so_lan_kham || 0
+            ]),
+            startY: 40
+        });
+        doc.save('BaoCaoBenhNhan.pdf');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().slice(0, 10); // 2025-07-23
+        document.getElementById('filterType').value = 'day';
+        document.getElementById('filterDay').value = today;
+        document.getElementById('filterMonth').value = (new Date().getMonth() + 1).toString();
+        document.getElementById('filterYear').value = new Date().getFullYear().toString();
+        document.getElementById('startDate').value = today;
+        document.getElementById('endDate').value = today;
+
+        // Cập nhật giao diện
+        updateFilterInputs();
+
+        // Chỉ gọi fetchPatientData nếu ma_bac_si không tồn tại
+        const ma_bac_si = localStorage.getItem('ma_bac_si');
+        if (ma_bac_si) {
+            fetchDoctorPatientCount();
+        } else {
+            fetchPatientData();
+        }
+
+        document.getElementById('filterType').addEventListener('change', () => {
+            updateFilterInputs();
+            const ma_bac_si = localStorage.getItem('ma_bac_si');
+            if (ma_bac_si) {
+                fetchDoctorPatientCount();
+            } else {
+                fetchPatientData();
+            }
+        });
+
+        ['filterDay', 'filterMonth', 'filterYear', 'startDate', 'endDate'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                const ma_bac_si = localStorage.getItem('ma_bac_si');
+                if (ma_bac_si) {
+                    fetchDoctorPatientCount();
+                } else {
+                    fetchPatientData();
+                }
+            });
+        });
+
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            document.getElementById('filterType').value = 'day';
+            document.getElementById('filterDay').value = today;
+            document.getElementById('filterMonth').value = (new Date().getMonth() + 1).toString();
+            document.getElementById('filterYear').value = new Date().getFullYear().toString();
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            updateFilterInputs();
+            const ma_bac_si = localStorage.getItem('ma_bac_si');
+            if (ma_bac_si) {
+                fetchDoctorPatientCount();
+            } else {
+                fetchPatientData();
+            }
+        });
+
+        document.getElementById('exportXls').addEventListener('click', exportXls);
+        document.getElementById('exportPdf').addEventListener('click', exportPdf);
+    });
+
+    function updateFilterInputs() {
+        const filterType = document.getElementById('filterType').value;
+        document.getElementById('dayFilter').style.display = filterType === 'day' ? 'block' : 'none';
+        document.getElementById('monthFilter').style.display = filterType === 'month' ? 'block' : 'none';
+        document.getElementById('yearFilter').style.display = ['month', 'year'].includes(filterType) ? 'block' : 'none';
+        document.getElementById('rangeFilter').style.display = filterType === 'range' ? 'block' : 'none';
+        document.getElementById('rangeFilterEnd').style.display = filterType === 'range' ? 'block' : 'none';
+    }
+</script>
 {% endblock %}
