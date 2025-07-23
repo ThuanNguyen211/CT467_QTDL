@@ -103,28 +103,38 @@ def delete_doctor(ma_bac_si):
     
 
 @doctor_bp.route('/doctors/patients', methods=['GET'])
-def get_doctor_patient_count():
+def get_doctor_patients():
+    response = {'patients': [], 'total_patients': 0, 'total_visits': 0}
     try:
         ma_bac_si = request.args.get('ma_bac_si')
-        # thang = request.args.get('thang', type=int)
-        # nam = request.args.get('nam', type=int)
-        
+        ngay = request.args.get('ngay', type=int, default=0)
+        thang = request.args.get('thang', type=int, default=0)
+        nam = request.args.get('nam', type=int, default=0)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
         if not ma_bac_si:
-            return jsonify({'error': 'Thiếu tham số ma_bac_si'}), 400
-        # if not ma_bac_si or thang is None or nam is None:
-        #     return jsonify({'error': 'Thiếu tham số ma_bac_si, thang hoặc nam'}), 400
-            
+            response['error'] = 'Thiếu tham số ma_bac_si'
+            return jsonify(response), 400
+
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, ))
-        # cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, thang, nam))
-        
+        cursor.callproc('ThongKeBenhNhanBacSi', (ma_bac_si, ngay, thang, nam, start_date, end_date))
+
         data = []
         for result in cursor.stored_results():
             data = result.fetchall()
-            
+
+        response['patients'] = data or []
+        response['total_patients'] = len(set(item['ma_benh_nhan'] for item in data)) if data else 0
+        response['total_visits'] = sum(item['so_lan_kham'] for item in data) if data else 0
+
         conn.close()
-        return jsonify(data)
+        return jsonify(response), 200
+
     except Exception as e:
-        print("Lỗi thống kê bệnh nhân của bác sĩ:", e)
-        return jsonify({'error': str(e)}), 500
+        print("Lỗi thống kê bác sĩ:", e)
+        response['error'] = f'Lỗi server: {str(e)}'
+        if 'conn' in locals():
+            conn.close()
+        return jsonify(response), 500
