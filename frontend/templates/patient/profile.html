@@ -2,90 +2,132 @@
 {% block title %}Thông tin Bác sĩ{% endblock %}
 {% block content %}
 <h2>Thông tin cá nhân</h2>
-<div id="doctor-info"></div>
+<div id="patient-info-view"></div>
+<div id="patient-info-edit" style="display:none;"></div>
+<button id="edit-button" class="btn btn-warning mt-3">Sửa</button>
+
 <script>
-    const ma_bac_si = localStorage.getItem('ma_bac_si');
-    console.log("ma_bac_si trong localStorage:", ma_bac_si);
+  const ma_benh_nhan = localStorage.getItem('ma_benh_nhan');
+  console.log("ma_benh_nhan trong localStorage:", ma_benh_nhan);
 
-    if (ma_bac_si) {
-        Promise.all([
-            fetch('http://localhost:5000/doctors/' + ma_bac_si).then(res => res.json()),
-            fetch('http://localhost:5000/specialty').then(res => res.json())
-        ])
-            .then(([doctor, specialties]) => {
-                console.log("Thông tin bác sĩ:", doctor);
-                console.log("Danh sách chuyên khoa:", specialties);
+  if (ma_benh_nhan) {
+    Promise.all([
+      fetch('http://localhost:5000/patients/' + ma_benh_nhan).then(res => res.json()),
+    ])
+      .then(([patient]) => {
+        console.log("Thông tin bệnh nhân:", patient);
 
-                // Render form
-                const formHTML = `
+        // Nếu API trả về là mảng (do fetchall()), lấy phần tử đầu tiên
+        if (Array.isArray(patient)) {
+          patient = patient[0];
+        }
+
+        function formatDate(dateString) {
+          if (!dateString) return "";
+          const date = new Date(dateString);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+
+        
+
+        // Hiển thị thông tin bệnh nhân (chế độ xem)
+        const viewHTML = `
+        <p><strong>Mã bệnh nhân:</strong> ${patient.ma_benh_nhan}</p>
+        <p><strong>Tên bệnh nhân:</strong> ${patient.ten_benh_nhan}</p>
+        <p><strong>Ngày sinh:</strong> ${formatDate(patient.ngay_sinh)}</p>
+        <p><strong>Số điện thoại:</strong> ${patient.so_dien_thoai}</p>
+        <p><strong>Địa chỉ:</strong> ${patient.dia_chi}</p>
+        <p><strong>Tiền sử bệnh:</strong> ${patient.tien_su_benh}</p>
+      `;
+        document.getElementById('patient-info-view').innerHTML = viewHTML;
+
+        // Nút sửa chuyển sang form cập nhật
+        document.getElementById('edit-button').addEventListener('click', () => {
+          document.getElementById('patient-info-view').style.display = 'none';
+          document.getElementById('edit-button').style.display = 'none';
+          renderEditForm(patient);
+          document.getElementById('patient-info-edit').style.display = 'block';
+        });
+      })
+      .catch(err => {
+        console.error("Lỗi khi tải dữ liệu:", err);
+        document.getElementById('patient-info-view').innerHTML = "<p>Lỗi khi tải dữ liệu bệnh nhân.</p>";
+      });
+
+    // Hiển thị form cập nhật
+    function renderEditForm(patient) {
+      const formHTML = `
         <form id="update-form">
           <div class="mb-3">
-            <label class="form-label">Mã bác sĩ</label>
-            <input type="text" class="form-control" name="ma_bac_si" value="${doctor.ma_bac_si}" readonly>
+            <label class="form-label">Mã bệnh nhân</label>
+            <input type="text" class="form-control" name="ma_benh_nhan" value="${patient.ma_benh_nhan}" readonly>
           </div>
           <div class="mb-3">
-            <label class="form-label">Tên bác sĩ</label>
-            <input type="text" class="form-control" name="ten_bac_si" value="${doctor.ten_bac_si}">
-          </div>
+            <label class="form-label">Tên bệnh nhân</label>
+            <input type="text" class="form-control" name="ten_benh_nhan" value="${patient.ten_benh_nhan}">
           <div class="mb-3">
-            <label class="form-label">Chuyên khoa</label>
-            <select class="form-select" name="ma_chuyen_khoa" id="specialty-select"></select>
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" class="form-control" name="ngay_sinh" value="${patient.ngay_sinh}">
           </div>
           <div class="mb-3">
             <label class="form-label">Số điện thoại</label>
-            <input type="text" class="form-control" name="so_dien_thoai" value="${doctor.so_dien_thoai}">
+            <input type="text" class="form-control" name="so_dien_thoai" value="${patient.so_dien_thoai}">
           </div>
           <div class="mb-3">
-            <label class="form-label">Kinh nghiệm (năm)</label>
-            <input type="number" class="form-control" name="kinh_nghiem" value="${doctor.kinh_nghiem}">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" class="form-control" name="dia_chi" value="${patient.dia_chi}">
           </div>
-          <button type="submit" class="btn btn-primary">Cập nhật</button>
+          <div class="mb-3">
+            <label class="form-label">Tiền sử bệnh</label>
+            <input type="text" class="form-control" name="tien_su_benh" value="${patient.tien_su_benh}">
+          </div>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
         </form>
       `;
-                document.getElementById('doctor-info').innerHTML = formHTML;
+      document.getElementById('patient-info-edit').innerHTML = formHTML;
 
-                // Gán options vào dropdown
-                const selectElement = document.getElementById('specialty-select');
-                specialties.forEach(specialty => {
-                    const option = document.createElement('option');
-                    option.value = specialty.ma_chuyen_khoa;
-                    option.textContent = specialty.ten_chuyen_khoa;
-                    if (doctor.ma_chuyen_khoa === specialty.ma_chuyen_khoa) {
-                        option.selected = true;
-                    }
-                    selectElement.appendChild(option);
-                });
-
-                // Xử lý cập nhật thông tin
-                document.getElementById('update-form').addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    const updatedData = {
-                        ten_bac_si: document.querySelector('input[name="ten_bac_si"]').value,
-                        ma_chuyen_khoa: document.querySelector('select[name="ma_chuyen_khoa"]').value,
-                        so_dien_thoai: document.querySelector('input[name="so_dien_thoai"]').value,
-                        kinh_nghiem: document.querySelector('input[name="kinh_nghiem"]').value
-                    };
-                    fetch('http://localhost:5000/doctors/' + ma_bac_si, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatedData)
-                    })
-                        .then(res => res.json())
-                        .then(result => {
-                            alert(result.message || "Cập nhật thành công!");
-                        })
-                        .catch(error => {
-                            alert("Lỗi khi cập nhật: " + error);
-                        });
-                });
-            })
-            .catch(err => {
-                console.error("Lỗi khi tải dữ liệu:", err);
-                document.getElementById('doctor-info').innerHTML = "<p>Lỗi khi tải dữ liệu bác sĩ hoặc chuyên khoa.</p>";
-            });
-    } else {
-        console.error("Không tìm thấy mã bác sĩ trong localStorage");
-        document.getElementById('doctor-info').innerHTML = "<p>Không tìm thấy thông tin bác sĩ.</p>";
+      function formatDateForDB(dateString) {
+        // Nếu đã đúng dạng yyyy-mm-dd thì trả về luôn
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+        // Nếu dạng dd/mm/yyyy thì chuyển lại
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+          const [day, month, year] = dateString.split('/');
+          return `${year}-${month}-${day}`;
+        }
+        return ""; // Không hợp lệ
+      }
+      
+      // Gửi cập nhật
+      document.getElementById('update-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const updatedData = {
+          ten_benh_nhan: document.querySelector('input[name="ten_benh_nhan"]').value,
+          ngay_sinh: formatDateForDB(document.querySelector('input[name="ngay_sinh"]').value),
+          so_dien_thoai: document.querySelector('input[name="so_dien_thoai"]').value,
+          dia_chi: document.querySelector('input[name="dia_chi"]').value,
+          tien_su_benh: document.querySelector('input[name="tien_su_benh"]').value
+        };
+        fetch('http://localhost:5000/patients/' + ma_benh_nhan, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedData)
+        })
+          .then(res => res.json())
+          .then(result => {
+            alert(result.message || "Cập nhật thành công!");
+            location.reload();  // Tải lại để hiển thị thông tin mới
+          })
+          .catch(error => {
+            alert("Lỗi khi cập nhật: " + error);
+          });
+      });
     }
+  } else {
+    console.error("Không tìm thấy mã bệnh nhân trong localStorage");
+    document.getElementById('patient-info-view').innerHTML = "<p>Không tìm thấy thông tin bệnh nhân.</p>";
+  }
 </script>
 {% endblock %}

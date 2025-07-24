@@ -18,7 +18,7 @@
       <td>{{ appt.trang_thai }}</td>
          <td>
         {% if appt.trang_thai == 'Đã đặt' %}
-        <a class="btn btn-sm btn-danger">Hủy</a>
+        <a href="#" onclick="cancelAppointment('{{ appt.ma_lich_hen }}', event)" class="btn btn-sm btn-danger">Hủy</a>
         {% endif %}
       </td>
     </tr>
@@ -45,11 +45,28 @@ document.addEventListener('DOMContentLoaded', async function() {
       <td>${appt.gio_hen}</td>
       <td>${appt.trang_thai}</td>
       <td>
-        ${appt.trang_thai === 'Đã đặt' ? `<a href="/patient/appointments/${appt.ma_lich_hen}/cancel" class="btn btn-sm btn-danger">Hủy</a>` : ''}
+        ${appt.trang_thai === 'Đã đặt' ? `<a href="#" onclick="cancelAppointment('${appt.ma_lich_hen}', event)" class="btn btn-sm btn-danger">Hủy</a>` : ''}
       </td>
     `;
     tbody.appendChild(tr);
   });
 });
+
+function cancelAppointment(ma_lich_hen, event) {
+  event.preventDefault();
+  if (!confirm("Bạn có chắc chắn muốn hủy lịch hẹn này?")) return;
+  fetch('http://localhost:5000/patient/appointments/' + ma_lich_hen + '/cancel', {
+    method: 'PUT'
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Đã hủy lịch hẹn!");
+      // Có thể reload lại danh sách lịch hẹn nếu muốn
+      location.reload();
+    })
+    .catch(err => {
+      alert("Lỗi khi hủy lịch hẹn!");
+    });
+}
 </script>
 {% endblock %} 

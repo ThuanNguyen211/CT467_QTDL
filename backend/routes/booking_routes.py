@@ -186,3 +186,20 @@ def get_bookings_by_doctor_id():
     print(rows)
     return jsonify(rows)
 
+
+@booking_bp.route('/patient/appointments/<ma_lich_hen>/cancel', methods=['PUT'])
+def cancel_appointment(ma_lich_hen):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Kiểm tra lịch hẹn có tồn tại không
+    cursor.execute("SELECT 1 FROM lich_hen WHERE ma_lich_hen = %s", (ma_lich_hen,))
+    if cursor.fetchone() is None:
+        conn.close()
+        return jsonify({'error': 'Không tìm thấy lịch hẹn'}), 404
+
+    # Cập nhật trạng thái thành "Đã hủy"
+    cursor.execute("UPDATE lich_hen SET trang_thai = %s WHERE ma_lich_hen = %s", ("Đã hủy", ma_lich_hen))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Hủy lịch hẹn thành công'}), 200
+
