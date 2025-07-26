@@ -11,7 +11,7 @@
             <option value="day">Theo ngày</option>
             <option value="month">Theo tháng</option>
             <option value="year">Theo năm</option>
-            <option value="range">Theo khoảng thời gian</option>
+            <!-- <option value="range">Theo khoảng thời gian</option> -->
         </select>
     </div>
     <div class="col-md-2" id="dayFilter">
@@ -151,20 +151,20 @@
                     title: { display: true, text: data.length > 0 ? 'Tỉ lệ thuốc sử dụng (Top 10)' : 'Không có dữ liệu', font: { size: 20 } },
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                const value = context.raw;
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
-                                return `${context.label}: ${percentage}%`;
-                            }
+                            // label: function (context) {
+                            //     const value = context.raw;
+                            //     const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
+                            //     return `${context.label}: ${percentage}%`;
+                            // }
                         }
                     },
                     datalabels: {
-                        formatter: (value) => {
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
-                            return `${percentage}%`;
-                        },
-                        color: '#fff',
-                        font: { weight: 'bold' }
+                        // formatter: (value) => {
+                        //     const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 100;
+                        //     return `${percentage}%`;
+                        // },
+                        // color: '#fff',
+                        // font: { weight: 'bold' }
                     }
                 }
             },

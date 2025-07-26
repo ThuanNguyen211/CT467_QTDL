@@ -34,14 +34,29 @@ DELIMITER ;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS LichSuKhamBenhNhan $$
-CREATE PROCEDURE LichSuKhamBenhNhan(IN ma_benh_nhan INT, IN ngay DATE)
+CREATE PROCEDURE LichSuKhamBenhNhan(IN ma_benh_nhan VARCHAR(10))
 BEGIN
-    SELECT pk.*, lh.ngay_hen, lh.gio_hen, lh.trang_thai, bs.ten_bac_si
+    SELECT pk.ma_phieu_kham, bs.ten_bac_si, pk.ngay_kham, pk.trieu_chung, pk.chan_doan, bn.tien_su_benh
     FROM benh_nhan bn
     JOIN lich_hen lh ON lh.ma_benh_nhan = bn.ma_benh_nhan
     JOIN phieu_kham pk ON pk.ma_lich_hen = lh.ma_lich_hen
     JOIN bac_si bs ON lh.ma_bac_si = bs.ma_bac_si
-    WHERE bn.ma_benh_nhan = ma_benh_nhan
-      AND pk.ngay_kham = ngay;
+    WHERE bn.ma_benh_nhan = ma_benh_nhan;
 END $$
 DELIMITER ;
+
+CALL LichSuKhamBenhNhan(1);
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS LichSuKhamBacSi $$
+CREATE PROCEDURE LichSuKhamBacSi(IN ma_bac_si VARCHAR(10))
+BEGIN
+    SELECT DISTINCT pk.ma_phieu_kham, bn.ten_benh_nhan, pk.ngay_kham, pk.trieu_chung, pk.chan_doan, bn.tien_su_benh
+    FROM bac_si bs
+    JOIN lich_hen lh ON lh.ma_bac_si = bs.ma_bac_si
+    JOIN phieu_kham pk ON pk.ma_lich_hen = lh.ma_lich_hen
+    JOIN benh_nhan bn ON lh.ma_benh_nhan = bn.ma_benh_nhan
+    WHERE bs.ma_bac_si = ma_bac_si;
+END $$
+DELIMITER ;
+

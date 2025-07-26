@@ -72,7 +72,7 @@ def doctor_prescription_new():
 @web_bp.route('/doctor/examinations/history')
 def doctor_examinations_history():
     try:
-        response = requests.get('http://localhost:5000/doctors/patients')
+        response = requests.get('http://localhost:5000/doctors/examinations')
         response.raise_for_status()
         medical_exams= response.json()
     except requests.exceptions.RequestException as e:
@@ -88,7 +88,7 @@ def doctor_statistics():
 def doctor_statistics_patients():
     return render_template('doctor/statistics_patients.html', patients=[])
 
-@web_bp.route('/doctor/statistics/medicine')
+@web_bp.route('/doctor/statistics/medicines')
 def doctor_medication_usage():
     return render_template('doctor/statistics_medicine.html')
 # Ngọc thêm 
@@ -134,4 +134,11 @@ def patient_appointment_cancel(ma_lich_hen):
 
 @web_bp.route('/patient/examinations/history')
 def patient_examinations_history():
-    return render_template('patient/examinations.html', examinations=[])
+    try:
+        response = requests.get('http://localhost:5000/patients/history')
+        response.raise_for_status()
+        medical_exams= response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Lỗi khi gọi API: {e}")
+        medical_exams = []
+    return render_template('patient/examinations.html', examinations= medical_exams)

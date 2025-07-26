@@ -22,7 +22,7 @@
 <table class="table table-bordered">
   <thead>
     <tr>
-      <th>BN</th>
+      <th>Mã bệnh nhân</th>
       <th>Ngày</th>
       <th>Giờ</th>
       <th>Trạng thái</th>
@@ -50,6 +50,15 @@
   </tbody>
 </table>
 <script>
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("filterForm");
     const inputMaBacSi = document.getElementById("ma_bac_si_input");
@@ -95,7 +104,7 @@
             const row = document.createElement("tr");
             row.innerHTML = `
               <td>${appt.ma_benh_nhan}</td>
-              <td>${appt.ngay_hen}</td>
+              <td>${formatDate(appt.ngay_hen)}</td>
               <td>${appt.gio_hen}</td>
               <td>${appt.trang_thai}</td>
               <td>

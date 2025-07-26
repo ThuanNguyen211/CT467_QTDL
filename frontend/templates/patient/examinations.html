@@ -1,23 +1,198 @@
-{% extends 'base_patient.html' %}
-{% block title %}Lịch sử Khám bệnh{% endblock %}
-{% block content %}
-<h2>Lịch sử Khám bệnh</h2>
+{% extends 'base_patient.html' %} 
+{% block title %}Lịch sử Phiếu Khám{% endblock
+%} {% block content %}
+<h2>Lịch sử Phiếu Khám</h2>
+<hr />
+
+<div class="row mb-3">
+  <div class="col-md-3">
+    <strong>Tìm kiếm</strong>
+    <input type="text" id="searchInput" class="form-control"
+      placeholder="Tìm theo tên bệnh nhân, triệu chứng, chẩn đoán" />
+  </div>
+  <div class="col-md-2">
+    <strong>Từ ngày</strong>
+    <input type="date" id="fromDate" class="form-control" placeholder="Từ ngày" />
+  </div>
+  <div class="col-md-2">
+    <strong>Đến ngày</strong>
+    <input type="date" id="toDate" class="form-control" placeholder="Đến ngày" />
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button id="clearFilters" class="btn btn-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise"
+        viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+      </svg>
+    </button>
+  </div>
+</div>
+
 <table class="table table-bordered">
   <thead>
     <tr>
-      <th>Mã phiếu</th><th>Bác sĩ</th><th>Ngày khám</th><th>Triệu chứng</th><th>Chẩn đoán</th>
+      <th onclick="sortTable('ma_phieu_kham')">Mã phiếu &#8597;</th>
+      <th onclick="sortTable('ten_bac_si')">Bác sĩ &#8597;</th>
+      <th onclick="sortTable('ngay_kham')">Ngày khám &#8597;</th>
+      <th onclick="sortTable('trieu_chung')">Triệu chứng &#8597;</th>
+      <th onclick="sortTable('chan_doan')">Chẩn đoán &#8597;</th>
+      <th>Hành động</th>
     </tr>
   </thead>
-  <tbody>
-    {% for exam in examinations %}
-    <tr>
-      <td>{{ exam.ma_phieu_kham }}</td>
-      <td>{{ exam.ten_bac_si }}</td>
-      <td>{{ exam.ngay_kham }}</td>
-      <td>{{ exam.trieu_chung }}</td>
-      <td>{{ exam.chan_doan }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
+  <tbody id="examsTbody"></tbody>
 </table>
-{% endblock %} 
+
+<div class="d-flex justify-content-between align-items-center">
+  <div>
+    Trang <span id="currentPage">1</span>/<span id="totalPages">1</span>
+  </div>
+  <div>
+    <button id="prevPage" class="btn btn-secondary btn-sm">Trước</button>
+    <button id="nextPage" class="btn btn-secondary btn-sm">Sau</button>
+  </div>
+</div>
+
+<script>
+  let allExams = [];
+  let filteredExams = [];
+  let currentPage = 1;
+  const pageSize = 10;
+  let sortField = "";
+  let sortAsc = true;
+
+  function formatDate(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function formatDateToInput(dateStr) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function renderExams(data) {
+    const tbody = document.getElementById("examsTbody");
+    tbody.innerHTML = "";
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    data.slice(start, end).forEach((exam) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+      <td>${exam.ma_phieu_kham}</td>
+      <td>${exam.ten_bac_si}</td>
+      <td>${formatDate(exam.ngay_kham)}</td>
+      <td>${exam.trieu_chung}</td>
+      <td>${exam.chan_doan}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="printExam(${exam.ma_phieu_kham})">
+          <i class="bi bi-printer"></i> Chi tiết
+        </button>
+      </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById("currentPage").innerText = currentPage;
+    document.getElementById("totalPages").innerText = Math.max(
+      1,
+      Math.ceil(data.length / pageSize)
+    );
+  }
+
+  function filterExams() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const fromDate = document.getElementById("fromDate").value;
+    const toDate = document.getElementById("toDate").value;
+    filteredExams = allExams.filter((exam) => {
+      const matchSearch =
+        exam.ten_bac_si.toLowerCase().includes(search) ||
+        exam.trieu_chung.toLowerCase().includes(search) ||
+        exam.chan_doan.toLowerCase().includes(search);
+      const examDate = formatDateToInput(exam.ngay_kham);
+      const matchFrom = !fromDate || examDate >= fromDate;
+      const matchTo = !toDate || examDate <= toDate;
+      return matchSearch && matchFrom && matchTo;
+    });
+    if (sortField) {
+      filteredExams.sort((a, b) => {
+        let valA = a[sortField];
+        let valB = b[sortField];
+        if (sortField === "ngay_kham") {
+          valA = formatDateToInput(valA);
+          valB = formatDateToInput(valB);
+        }
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+    }
+    currentPage = 1;
+    renderExams(filteredExams);
+  }
+
+  function sortTable(field) {
+    if (sortField === field) {
+      sortAsc = !sortAsc;
+    } else {
+      sortField = field;
+      sortAsc = true;
+    }
+    filterExams();
+  }
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    const ma_benh_nhan = localStorage.getItem("ma_benh_nhan");
+    if (!ma_benh_nhan) {
+      alert("Không tìm thấy mã bệnh nhân!");
+      return;
+    }
+    const response = await fetch(
+      `http://127.0.0.1:5000/patients/history?ma_benh_nhan=${ma_benh_nhan}`
+    );
+    allExams = await response.json();
+    filterExams();
+
+    document
+      .getElementById("searchInput")
+      .addEventListener("input", filterExams);
+    document.getElementById("fromDate").addEventListener("change", filterExams);
+    document.getElementById("toDate").addEventListener("change", filterExams);
+
+    document.getElementById("prevPage").addEventListener("click", function () {
+      if (currentPage > 1) {
+        currentPage--;
+        renderExams(filteredExams);
+      }
+    });
+    document.getElementById("nextPage").addEventListener("click", function () {
+      const totalPages = Math.ceil(filteredExams.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderExams(filteredExams);
+      }
+    });
+
+    document
+      .getElementById("clearFilters")
+      .addEventListener("click", function () {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("fromDate").value = "";
+        document.getElementById("toDate").value = "";
+        filterExams();
+      });
+  });
+
+  // In phiếu khám
+  function printExam(maPhieuKham) {
+    window.open(`/doctor/examinations/${maPhieuKham}/print`, "_blank");
+  }
+</script>
+{% endblock %}

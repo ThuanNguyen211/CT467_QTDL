@@ -155,14 +155,21 @@ def search_patients():
 def get_patient_history():
     try:
         ma_benh_nhan = request.args.get('ma_benh_nhan')
-        ngay = request.args.get('ngay')
+        # ngay = request.args.get('ngay')
         
-        if not ma_benh_nhan or not ngay:
-            return jsonify({'error': 'Thiếu tham số ma_benh_nhan hoặc ngay'}), 400
-            
+        # if not ma_benh_nhan or not ngay:
+        #     return jsonify({'error': 'Thiếu tham số ma_benh_nhan hoặc ngay'}), 400
+        if not ma_benh_nhan:
+            return jsonify({'error': 'Thiếu tham số ma_benh_nhan'}), 400
+        
+        print(ma_benh_nhan)
+
         conn = get_connection()
+        print("Kết nối CSDL thành công")
         cursor = conn.cursor(dictionary=True)
-        cursor.callproc('LichSuKhamBenhNhan', (ma_benh_nhan, ngay))
+        print("Tạo con trỏ thành công")
+        cursor.callproc('LichSuKhamBenhNhan', (ma_benh_nhan, ))
+        print("Gọi thủ tục thành công")
         
         data = []
         for result in cursor.stored_results():
@@ -173,6 +180,8 @@ def get_patient_history():
     except Exception as e:
         print("Lỗi lấy lịch sử khám bệnh:", e)
         return jsonify({'error': str(e)}), 500
+    
+
 
 @patient_bp.route('/stats/patient/usage', methods=['GET'])
 def get_patient_usage():

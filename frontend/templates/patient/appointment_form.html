@@ -26,86 +26,139 @@
   <button type="submit" class="btn btn-primary">Đặt lịch</button>
 </form>
 <script>
-
-// Lấy danh sách bác sĩ và đổ vào select
-async function fetchDoctors() {
-  const response = await fetch('http://127.0.0.1:5000/doctors');
-  const doctors = await response.json();
-  const select = document.getElementById('ma_bac_si');
-  select.innerHTML = '';
-  doctors.forEach(doctor => {
-    const option = document.createElement('option');
-    option.value = doctor.ma_bac_si;
-    option.textContent = `${doctor.ten_bac_si} (${doctor.ten_chuyen_khoa || ''})`;
-    select.appendChild(option);
-  });
-}
-
-let availableTimes = [];
-
-async function fetchAvailableSlots() {
-  const ma_bac_si = document.getElementById('ma_bac_si').value;
-  const ngay_hen = document.getElementById('ngay_hen').value;
-  if (!ma_bac_si || !ngay_hen) return;
-
-  const response = await fetch(`http://127.0.0.1:5000/booking/available-slots?ma_bac_si=${ma_bac_si}&ngay=${ngay_hen}`);
-  const data = await response.json();
-
-  const gioHenSelect = document.getElementById('gio_hen');
-  gioHenSelect.innerHTML = '';
-  data.forEach(slot => {
-    const option = document.createElement('option');
-    option.value = slot.gio; // Lấy giá trị từ key "gio"
-    option.textContent = slot.gio;
-    gioHenSelect.appendChild(option);
-  });
-}
-
-
-// Gọi khi trang vừa load
-window.addEventListener('DOMContentLoaded', async function() {
-  await fetchDoctors();
-  fetchAvailableSlots(); // Gọi luôn hàm lấy giờ trống nếu muốn tự động cập nhật
-});
-
-// Gọi khi chọn bác sĩ hoặc ngày khám
-document.getElementById('ma_bac_si').addEventListener('change', fetchAvailableSlots);
-document.getElementById('ngay_hen').addEventListener('change', fetchAvailableSlots);
-
-// Kiểm tra lại giờ trước khi submit
-document.querySelector('form').onsubmit = async function(e) {
-  e.preventDefault();
-  const ma_benh_nhan = localStorage.getItem('ma_benh_nhan');
-  if (!ma_benh_nhan) {
-    alert('Không tìm thấy mã bệnh nhân!');
-    return;
+  function formatDateToInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
-  const gio_hen = document.getElementById('gio_hen').value;
-  if (availableTimes.includes(gio_hen)) {
-    alert('Khung giờ này đã được đặt, vui lòng chọn lại!');
-    await fetchAvailableSlots(); // Cập nhật lại giờ trống
-    return;
+
+  // Lấy danh sách bác sĩ và đổ vào select
+  async function fetchDoctors() {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/doctors');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const doctors = await response.json();
+      const select = document.getElementById('ma_bac_si');
+      select.innerHTML = '';
+      doctors.forEach(doctor => {
+        const option = document.createElement('option');
+        option.value = doctor.ma_bac_si;
+        option.textContent = `${doctor.ten_bac_si} (${doctor.ten_chuyen_khoa || ''})`;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Lỗi lấy danh sách bác sĩ:', error);
+      alert('Không thể tải danh sách bác sĩ: ' + error.message);
+    }
   }
-  const formData = new FormData(this);
-  const data = {
-    ma_benh_nhan: ma_benh_nhan,
-    ma_bac_si: formData.get('ma_bac_si'),
-    ngay_hen: formData.get('ngay_hen'),
-    gio_hen: formData.get('gio_hen'),
-    trang_thai: 'Đã đặt'
+
+  let availableTimes = [];
+
+  async function fetchAvailableSlots() {
+    const ma_bac_si = document.getElementById('ma_bac_si').value;
+    const ngay_hen = document.getElementById('ngay_hen').value;
+    if (!ma_bac_si || !ngay_hen) return;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/booking/available-slots?ma_bac_si=${ma_bac_si}&ngay=${ngay_hen}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      const gioHenSelect = document.getElementById('gio_hen');
+      gioHenSelect.innerHTML = '';
+      if (data.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Không có giờ trống';
+        gioHenSelect.appendChild(option);
+      } else {
+        data.forEach(slot => {
+          const option = document.createElement('option');
+          option.value = slot.gio;
+          option.textContent = slot.gio;
+          gioHenSelect.appendChild(option);
+        });
+      }
+      availableTimes = data.map(slot => slot.gio);
+    } catch (error) {
+      console.error('Lỗi lấy giờ trống:', error);
+      alert('Không thể tải giờ trống: ' + error.message);
+    }
+  }
+
+  // Gọi khi trang vừa load
+  window.addEventListener('DOMContentLoaded', async function () {
+    // Đặt ngày tiếp theo và ràng buộc min/max
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const oneWeekLater = new Date(today);
+    oneWeekLater.setDate(today.getDate() + 7);
+
+    const tomorrowStr = formatDateToInput(tomorrow); // Ngày tiếp theo
+    const oneWeekLaterStr = formatDateToInput(oneWeekLater); // Ngày hiện tại + 7
+
+    const ngayHenInput = document.getElementById('ngay_hen');
+    ngayHenInput.value = tomorrowStr; // Tự động điền ngày tiếp theo
+    ngayHenInput.min = tomorrowStr; // Ràng buộc ngày tối thiểu (ngày tiếp theo)
+    ngayHenInput.max = oneWeekLaterStr; // Ràng buộc ngày tối đa (ngày hiện tại + 7)
+
+    await fetchDoctors();
+    await fetchAvailableSlots(); // Cập nhật giờ trống ngay sau khi điền ngày
+  });
+
+  // Gọi khi chọn bác sĩ hoặc ngày khám
+  document.getElementById('ma_bac_si').addEventListener('change', fetchAvailableSlots);
+  document.getElementById('ngay_hen').addEventListener('change', function () {
+    const today = new Date();
+    const tomorrow = formatDateToInput(new Date(today.setDate(today.getDate() + 1)));
+    const oneWeekLater = formatDateToInput(new Date(today.setDate(today.getDate() + 6))); // +6 vì today đã là tomorrow
+    if (this.value < tomorrow || this.value > oneWeekLater) {
+      alert('Ngày khám chỉ có thể từ ngày mai đến 1 tuần sau!');
+      this.value = tomorrow;
+    }
+    fetchAvailableSlots();
+  });
+
+  // Kiểm tra lại giờ trước khi submit
+  document.querySelector('form').onsubmit = async function (e) {
+    e.preventDefault();
+    const ma_benh_nhan = localStorage.getItem('ma_benh_nhan');
+    if (!ma_benh_nhan) {
+      alert('Không tìm thấy mã bệnh nhân!');
+      return;
+    }
+    const gio_hen = document.getElementById('gio_hen').value;
+    if (!availableTimes.includes(gio_hen)) {
+      alert('Khung giờ này không hợp lệ, vui lòng chọn lại!');
+      await fetchAvailableSlots(); // Cập nhật lại giờ trống
+      return;
+    }
+    const formData = new FormData(this);
+    const data = {
+      ma_benh_nhan: ma_benh_nhan,
+      ma_bac_si: formData.get('ma_bac_si'),
+      ngay_hen: formData.get('ngay_hen'),
+      gio_hen: formData.get('gio_hen'),
+      trang_thai: 'Đã đặt'
+    };
+    try {
+      const response = await fetch('http://127.0.0.1:5000/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('Đặt lịch thành công!');
+        window.location.href = '/patient/appointments';
+      } else {
+        alert(result.error || 'Đặt lịch thất bại!');
+      }
+    } catch (error) {
+      console.error('Lỗi đặt lịch:', error);
+      alert('Đặt lịch thất bại: ' + error.message);
+    }
   };
-  const response = await fetch('http://127.0.0.1:5000/bookings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  });
-  const result = await response.json();
-  if (response.ok) {
-    alert('Đặt lịch thành công!');
-    window.location.href = '/patient/appointments';
-  } else {
-    alert(result.error || 'Đặt lịch thất bại!');
-  }
-};
 </script>
-{% endblock %} 
+{% endblock %}

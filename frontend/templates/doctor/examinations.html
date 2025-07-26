@@ -10,7 +10,7 @@
       type="text"
       id="searchInput"
       class="form-control"
-      placeholder="Tìm theo tên bệnh nhân, triệu chứng, chẩn đoán"
+      placeholder="Tìm theo tên bệnh nhân, triệu chứng, chuẩn đoán"
     />
   </div>
   <div class="col-md-2">
@@ -60,7 +60,7 @@
       <th onclick="sortTable('ten_benh_nhan')">Bệnh nhân &#8597;</th>
       <th onclick="sortTable('ngay_kham')">Ngày khám &#8597;</th>
       <th onclick="sortTable('trieu_chung')">Triệu chứng &#8597;</th>
-      <th onclick="sortTable('chan_doan')">Chẩn đoán &#8597;</th>
+      <th onclick="sortTable('chan_doan')">Chuẩn đoán &#8597;</th>
       <th>Hành động</th>
     </tr>
   </thead>
@@ -85,6 +85,15 @@
   let sortField = "";
   let sortAsc = true;
 
+  function formatDate(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
   function formatDateToInput(dateStr) {
     const date = new Date(dateStr);
     if (isNaN(date)) return "";
@@ -104,7 +113,7 @@
       tr.innerHTML = `
       <td>${exam.ma_phieu_kham}</td>
       <td>${exam.ten_benh_nhan}</td>
-      <td>${exam.ngay_kham}</td>
+      <td>${formatDate(exam.ngay_kham)}</td>
       <td>${exam.trieu_chung}</td>
       <td>${exam.chan_doan}</td>
       <td>
@@ -170,7 +179,7 @@
       return;
     }
     const response = await fetch(
-      `http://127.0.0.1:5000/doctors/patients?ma_bac_si=${ma_bac_si}`
+      `http://127.0.0.1:5000/doctors/examinations?ma_bac_si=${ma_bac_si}`
     );
     allExams = await response.json();
     filterExams();

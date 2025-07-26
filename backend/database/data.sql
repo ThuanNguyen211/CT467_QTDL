@@ -3,39 +3,131 @@ USE phong_kham;
 INSERT INTO chuyen_khoa (ten_chuyen_khoa, mo_ta) VALUES
 ('Nội khoa', 'Chuyên khoa nội'),
 ('Ngoại khoa', 'Chuyên khoa ngoại'),
-('Nhi khoa', 'Chuyên khoa nhi');
+('Nhi khoa', 'Chuyên khoa nhi'),
+('Tim mạch', 'Chuyên khoa về bệnh tim và mạch máu'),
+('Da liễu', 'Chuyên khoa về da và các bệnh liên quan'),
+('Thần kinh', 'Chuyên khoa về hệ thần kinh');
 
 INSERT INTO bac_si (ten_bac_si, ma_chuyen_khoa, so_dien_thoai, kinh_nghiem) VALUES
-('Nguyen Van A', 1, '0912345678', 10),
-('Tran Thi B', 2, '0912345679', 8),
-('Le Van C', 3, '0912345680', 5);
+('Nguyễn Minh Truyền', 1, '0912345678', 10),
+('Trần Thị Hồng Ngọc', 2, '0912345679', 8),
+('Nguyễn Minh Thuần', 3, '0912345680', 5),
+('Lai Trung Tín', 4, '0912345681', 12),
+('Nguyễn Duy Thành', 5, '0912345682', 7),
+('Trần Minh Hiếu', 6, '0912345683', 9),
+('Ngô Thị Hồng Thảo', 1, '0912345684', 15),
+('Ngô Văn Kỳ', 2, '0912345685', 6),
+('Lê Tuấn Khang', 3, '0912345686', 10);
 
 INSERT INTO benh_nhan (ten_benh_nhan, ngay_sinh, so_dien_thoai, dia_chi, tien_su_benh) VALUES
-('Pham Thi D', '1990-05-15', '0901234567', '123 Đường A, Hà Nội', 'Không'),
-('Hoang Van E', '1985-08-20', '0901234568', '456 Đường B, TP.HCM', 'Tiểu đường'),
-('Nguyen Thi F', '1995-03-10', '0901234569', '789 Đường C, Đà Nẵng', 'Không');
+('Ngô Thị Thu Thảo', '1990-05-15', '0901234567', '123 Đường A, Hà Nội', 'Không'),
+('Ngô Đại Kỳ', '1985-08-20', '0901234568', '456 Đường B, TP.HCM', 'Tiểu đường'),
+('Nguyễn Duy Thanh', '1995-03-10', '0901234569', '789 Đường C, Đà Nẵng', 'Không'),
+('Quách Tuấn Khang', '1988-11-25', '0901234570', '101 Đường D, Hà Nội', 'Tăng huyết áp'),
+('Trần Minh Hiểu', '1992-07-30', '0901234571', '202 Đường E, TP.HCM', 'Không'),
+('Lê Thị Tú Quyên', '1980-04-12', '0901234572', '303 Đường F, Đà Nẵng', 'Viêm gan B'),
+('Phạm Văn Đời', '1998-09-05', '0901234573', '404 Đường G, Hải Phòng', 'Không'),
+('Hoàng Văn Sang', '1975-12-20', '0901234574', '505 Đường H, Cần Thơ', 'Tiểu đường'),
+('Võ Thị Thu Huyền', '1993-06-15', '0901234575', '606 Đường I, Hà Nội', 'Không'),
+('Nguyễn Văn Tài', '1987-02-14', '0901234576', '707 Đường J, Hà Nội', 'Không'),
+('Trần Thị Minh Anh', '1994-06-22', '0901234577', '808 Đường K, TP.HCM', 'Dị ứng'),
+('Lê Văn Việt', '1978-09-10', '0901234578', '909 Đường L, Đà Nẵng', 'Tiểu đường'),
+('Phạm Thị Hồng Thắm', '1990-12-05', '0901234579', '1010 Đường M, Hải Phòng', 'Không'),
+('Hoàng Văn Út', '1983-03-18', '0901234580', '1111 Đường N, Cần Thơ', 'Tăng huyết áp'),
+('Võ Thị Ý', '1996-08-30', '0901234581', '1212 Đường P, Hà Nội', 'Không');
 
 INSERT INTO thuoc (ten_thuoc, don_vi, gia) VALUES
 ('Paracetamol', 'Viên', 5000.0),
 ('Amoxicillin', 'Hộp', 25000.0),
-('Ibuprofen', 'Viên', 7000.0);
+('Ibuprofen', 'Viên', 7000.0),
+('Aspirin', 'Viên', 6000.0),
+('Metformin', 'Viên', 8000.0),
+('Loratadine', 'Viên', 5500.0),
+('Cefixime', 'Viên', 12000.0),
+('Omeprazole', 'Viên', 9000.0),
+('Vitamin C', 'Viên', 4000.0);
 
 INSERT INTO lich_hen (ma_benh_nhan, ma_bac_si, ngay_hen, gio_hen, trang_thai) VALUES
 (1, 1,'2025-07-12', '09:00:00', 'Đã khám'),
 (2, 2,'2025-07-13', '14:00:00', 'Đã khám'),
-(3, 3,'2025-07-14', '10:00:00', 'Đã khám');
+(3, 3,'2025-07-14', '10:00:00', 'Đã khám'),
+(1, 1, '2025-07-15', '15:00:00', 'Đã khám'),
+(5, 5, '2025-07-15', '10:00:00', 'Đã khám'),
+(6, 6, '2025-07-15', '13:00:00', 'Đã khám'),
+(4, 1, '2025-07-16', '09:30:00', 'Đã khám'),
+(5, 2, '2025-07-16', '14:30:00', 'Đã khám'),
+(6, 3, '2025-07-16', '11:00:00', 'Đã khám'),
+(1, 4, '2025-07-17', '08:30:00', 'Đã khám'),
+(2, 5, '2025-07-17', '15:00:00', 'Đã khám'),
+(3, 6, '2025-07-17', '10:30:00', 'Đã khám'),
+(7, 1, '2025-07-18', '08:00:00', 'Đã khám'),
+(8, 1, '2025-07-18', '09:00:00', 'Đã khám'),
+(9, 1, '2025-07-18', '10:00:00', 'Đã khám'),
+(10, 1, '2025-07-19', '08:30:00', 'Đã khám'),
+(11, 1, '2025-07-19', '09:30:00', 'Đã khám'),
+(12, 1, '2025-07-19', '10:30:00', 'Đã khám'),
+(1, 1, '2025-07-20', '08:00:00', 'Đã đặt'),
+(7, 1, '2025-07-20', '09:00:00', 'Đã đặt'),
+(8, 1, '2025-07-20', '10:00:00', 'Đã hủy'),
+(9, 1, '2025-07-21', '08:30:00', 'Đã đặt'),
+(10, 1, '2025-07-21', '09:30:00', 'Đã hủy');
 
 INSERT INTO phieu_kham (ma_lich_hen, trieu_chung, chan_doan, ngay_kham) VALUES
 (1, 'Sốt, ho', 'Cảm lạnh', '2025-07-12'),
 (2, 'Đau bụng', 'Viêm dạ dày', '2025-07-13'),
-(3, 'Sốt cao', 'Nhiễm virus', '2025-07-14');
+(3, 'Sốt cao', 'Nhiễm virus', '2025-07-14'),
+(4, 'Đau ngực, khó thở', 'Bệnh tim mạch', '2025-07-15'),
+(5, 'Phát ban, ngứa', 'Viêm da dị ứng', '2025-07-15'),
+(6, 'Đau đầu, chóng mặt', 'Rối loạn tiền đình', '2025-07-15'),
+(7, 'Sốt, đau họng', 'Viêm họng', '2025-07-16'),
+(8, 'Đau bụng, tiêu chảy', 'Rối loạn tiêu hóa', '2025-07-16'),
+(9, 'Sốt, mệt mỏi', 'Cảm cúm', '2025-07-16'),
+(10, 'Tức ngực', 'Tăng huyết áp', '2025-07-17'),
+(11, 'Nổi mẩn đỏ', 'Dị ứng da', '2025-07-17'),
+(12, 'Đau đầu, mất ngủ', 'Suy nhược thần kinh', '2025-07-17'),
+(13, 'Sốt, đau họng', 'Viêm họng cấp', '2025-07-18'),
+(14, 'Mệt mỏi, đau đầu', 'Thiếu máu', '2025-07-18'),
+(15, 'Đau bụng, buồn nôn', 'Rối loạn tiêu hóa', '2025-07-18'),
+(16, 'Ho, khó thở', 'Viêm phế quản', '2025-07-19'),
+(17, 'Tức ngực, hồi hộp', 'Rối loạn nhịp tim', '2025-07-19'),
+(18, 'Đau lưng, mệt mỏi', 'Thoái hóa cột sống', '2025-07-19');
 
 INSERT INTO don_thuoc (ma_phieu_kham, ma_thuoc, so_luong, lieu_dung, cach_dung) VALUES
 (1, 1, 10, '1 viên/lần', 'Uống sau ăn'),
 (2, 2, 5, '1 hộp/lần', 'Uống trước ăn'),
-(3, 1, 15, '1 viên/lần', 'Uống sau ăn');
+(3, 1, 15, '1 viên/lần', 'Uống sau ăn'),
+(4, 4, 20, '1 viên/lần', 'Uống sau ăn'),
+(5, 5, 10, '1 viên/lần', 'Uống trước ăn'),
+(6, 6, 15, '1 viên/lần', 'Uống buổi tối'),
+(7, 1, 12, '1 viên/lần', 'Uống sau ăn'),
+(8, 2, 7, '1 hộp/lần', 'Uống trước ăn'),
+(9, 3, 10, '1 viên/lần', 'Uống sau ăn'),
+(10, 4, 15, '1 viên/lần', 'Uống sáng tối'),
+(11, 5, 8, '1 viên/lần', 'Uống trước ăn'),
+(12, 6, 20, '1 viên/lần', 'Uống buổi tối'),
+(13, 7, 10, '1 viên/lần', 'Uống sau ăn'),
+(14, 8, 14, '1 viên/lần', 'Uống trước ăn'),
+(15, 9, 20, '1 viên/lần', 'Uống buổi sáng'),
+(16, 7, 12, '1 viên/lần', 'Uống sau ăn'),
+(17, 8, 10, '1 viên/lần', 'Uống trước ăn'),
+(18, 9, 15, '1 viên/lần', 'Uống buổi tối');
 
 INSERT INTO nguoi_dung (email, ma_bac_si, ma_benh_nhan, mat_khau, role) VALUES
 ('bs01@gmail.com', 1, NULL, '123456', 'bac_si'),
 ('bn01@gmail.com', NULL, 1, '123456', 'benh_nhan'),
-('bs02@gmail.com', 2, NULL, '123456', 'bac_si');
+('bs02@gmail.com', 2, NULL, '123456', 'bac_si'),
+('bs04@gmail.com', 4, NULL, '123456', 'bac_si'),
+('bs05@gmail.com', 5, NULL, '123456', 'bac_si'),
+('bs06@gmail.com', 6, NULL, '123456', 'bac_si'),
+('bn04@gmail.com', NULL, 4, '123456', 'benh_nhan'),
+('bn05@gmail.com', NULL, 5, '123456', 'benh_nhan'),
+('bn06@gmail.com', NULL, 6, '123456', 'benh_nhan'),
+('bs07@gmail.com', 7, NULL, '123456', 'bac_si'),
+('bs08@gmail.com', 8, NULL, '123456', 'bac_si'),
+('bs09@gmail.com', 9, NULL, '123456', 'bac_si'),
+('bn07@gmail.com', NULL, 7, '123456', 'benh_nhan'),
+('bn08@gmail.com', NULL, 8, '123456', 'benh_nhan'),
+('bn09@gmail.com', NULL, 9, '123456', 'benh_nhan'),
+('bn10@gmail.com', NULL, 10, '123456', 'benh_nhan'),
+('bn11@gmail.com', NULL, 11, '123456', 'benh_nhan'),
+('bn12@gmail.com', NULL, 12, '123456', 'benh_nhan');
